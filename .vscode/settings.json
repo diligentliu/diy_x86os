@@ -1,0 +1,15 @@
+{
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "${workspaceFolder}/.",
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "dirent.h": "c",
+        "lib_syscall.h": "c",
+        "task.h": "c",
+        "types.h": "c",
+        "fcntl.h": "c",
+        "_default_fcntl.h": "c",
+        "loader.h": "c",
+        "klib.h": "c"
+    },
+}
