@@ -27,10 +27,23 @@ static int tss_init(task_t *task, uint32_t entry, uint32_t esp) {
 int task_init(task_t *task, uint32_t entry, uint32_t esp) {
 	ASSERT(task != (task_t *)(0));
 
-	tss_init(task, entry, esp);
-	return 0;
+	// tss_init(task, entry, esp);
+	uint32_t *pesp = (uint32_t *) esp;
+	if (pesp) {
+		*(--pesp) = entry;
+		*(--pesp) = 0;
+		*(--pesp) = 0;
+		*(--pesp) = 0;
+		*(--pesp) = 0;
+		task->stack = pesp;
+		return 0;
+	} else {
+		log_printf("task_init: esp is null");
+		return -1;
+	}
 }
 
 void task_switch_from_to(task_t *from, task_t *to) {
-	switch_to_tss(to->tss_selector);
+	// switch_to_tss(to->tss_selector);
+	simple_switch(&from->stack, to->stack);
 }

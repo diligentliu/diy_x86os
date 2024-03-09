@@ -14,20 +14,20 @@
 	.extern kernel_init
 	.extern init_main
 _start:
-    # 第一种方法
-    # push %ebp
-    # mov %esp, %ebp
-    # mov 0x8(%ebp), %eax
-    # push %eax
+    // 第一种方法
+    // push %ebp
+    // mov %esp, %ebp
+    // mov 0x8(%ebp), %eax
+    // push %eax
 
-    # 第二种方法
-    # mov 4(%esp), %eax
-    # push %eax
+    // 第二种方法
+    // mov 4(%esp), %eax
+    // push %eax
 
-    # 第三种方法
+    // 第三种方法
     push 4(%esp)
 
-    # kernel_init(boot_info)
+    // kernel_init(boot_info)
     call kernel_init
 
 	// 重新加载GDT
@@ -118,3 +118,26 @@ exception_handler virtual_exception, 20, 0
 
 // 硬件中断
 exception_handler timer, 0x20, 0
+
+	.text
+	.global simple_switch
+
+simple_switch:
+	// from
+	mov 4(%esp), %eax
+	// to
+	mov 8(%esp), %edx
+
+	push %ebp
+	push %ebx
+	push %esi
+	push %edi
+
+	mov %esp, (%eax)
+	mov %edx, %esp
+
+	pop %edi
+	pop %esi
+	pop %ebx
+	pop %ebp
+	ret
