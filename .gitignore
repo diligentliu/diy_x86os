@@ -2,4 +2,5 @@
 /build
 /cmake-build-debug
 /cmake-build-debug-x86_63-elf
+/image
 .DS_Store
