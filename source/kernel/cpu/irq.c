@@ -1,8 +1,5 @@
 /**
  * 中断处理
- *
- * 作者：李述铜
- * 联系邮箱: 527676163@qq.com
  */
 #include "cpu/irq.h"
 #include "comm/cpu_instr.h"
@@ -253,4 +250,14 @@ void irq_disable_global(void) {
 
 void irq_enable_global(void) {
 	sti();
+}
+
+irq_state_t irq_enter_protection() {
+	irq_state_t state = read_eflags();
+	irq_disable_global();
+	return state;
+}
+
+void irq_leave_protection(irq_state_t state) {
+	write_eflags(state);
 }

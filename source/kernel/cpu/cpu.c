@@ -1,14 +1,14 @@
 ﻿/**
  * CPU设置
- *
- * 作者：李述铜
- * 联系邮箱: 527676163@qq.com
  */
-#include "comm/cpu_instr.h"
 #include "cpu/cpu.h"
+#include "comm/cpu_instr.h"
+#include "cpu/irq.h"
 #include "os_cfg.h"
+#include "ipc/mutex.h"
 
 static segment_desc_t gdt_table[GDT_TABLE_SIZE];
+static mutex_t gdt_mutex;
 
 /**
  * 设置段描述符
@@ -66,6 +66,7 @@ void init_gdt(void) {
  * CPU初始化
  */
 void cpu_init(void) {
+	mutex_init(&gdt_mutex);
 	init_gdt();
 }
 
@@ -73,12 +74,17 @@ void cpu_init(void) {
  * 分配一个GDT描述符
  */
 int gdt_alloc_desc() {
-	for (int i = 1; i < GDT_TABLE_SIZE; ++i) {
+	mutex_lock(&gdt_mutex);
+
+	for (uint32_t i = 1; i < GDT_TABLE_SIZE; ++i) {
 		segment_desc_t *desc = gdt_table + i;
 		if (desc->attr == 0) {
+			mutex_unlock(&gdt_mutex);
 			return i * sizeof(segment_desc_t);
 		}
 	}
+
+	mutex_unlock(&gdt_mutex);
 	return -1;
 }
 
