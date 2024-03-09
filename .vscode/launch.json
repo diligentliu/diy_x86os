@@ -15,7 +15,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "x86_64-elf-gdb",
+            "miDebuggerPath": "/opt/homebrew/bin/x86_64-elf-gdb",
             "miDebuggerServerAddress": "127.0.0.1:1234",
             "targetArchitecture": "x86",
             "stopAtConnect": true,

@@ -1,8 +1,8 @@
 #ifndef KLIB_H
 #define KLIB_H
 
-#include "comm/types.h"
 #include <stdarg.h>
+#include "comm/types.h"
 
 void kernel_strcpy(char *dest, const char *src);
 void kernel_strncpy(char *dest, const char *src, int size);

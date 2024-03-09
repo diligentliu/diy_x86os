@@ -3,15 +3,12 @@
  *
  * 二级加载部分，用于实现更为复杂的初始化、内核加载的工作。
  *
- * 作者：李述铜
- * 联系邮箱: 527676163@qq.com
  */
 #ifndef LOADER_H
 #define LOADER_H
 
 #include "comm/types.h"
 #include "comm/boot_info.h"
-#include "comm/cpu_instr.h"
 
 // 保护模式入口函数，在start.asm中定义
 void protect_mode_entry(void);

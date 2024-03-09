@@ -1,14 +1,14 @@
 /**
  * 硬件定时器配置
- *
- * 创建时间：2022年6月5日
- * 作者：李述铜
- * 联系邮箱: 527676163@qq.com
  */
 #ifndef TIMER_H
 #define TIMER_H
 
 #include "comm/types.h"
+#include "cpu/irq.h"
+#include "comm/cpu_instr.h"
+#include "os_cfg.h"
+#include "core/task.h"
 
 #define PIT_OSC_FREQ                1193182                // 定时器时钟
 

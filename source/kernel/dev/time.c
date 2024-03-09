@@ -3,9 +3,6 @@
 //
 
 #include "dev/time.h"
-#include "cpu/irq.h"
-#include "comm/cpu_instr.h"
-#include "os_cfg.h"
 
 static uint32_t sys_tick;                        // 系统启动后的tick数量
 
@@ -18,13 +15,14 @@ void do_handler_timer(exception_frame_t *frame) {
 	// 先发EOI，而不是放在最后
 	// 放最后将从任务中切换出去之后，除非任务再切换回来才能继续噢应
 	pic_send_eoi(IRQ0_TIMER);
+	task_time_tick();
 }
 
 /**
  * 初始化硬件定时器
  */
 static void init_pit(void) {
-	uint32_t reload_count = PIT_OSC_FREQ / (1000.0 / OS_TICK_MS);
+	uint32_t reload_count = PIT_OSC_FREQ / (1000.0 / OS_TICKS_MS);
 
 	// 2023-3-18 写错了，应该是模式3或者模式2
 	//outb(PIT_COMMAND_MODE_PORT, PIT_CHANNLE0 | PIT_LOAD_LOHI | PIT_MODE0);

@@ -1,15 +1,16 @@
 /**
  * 内核初始化以及测试代码
  */
+#include "init.h"
 #include "comm/boot_info.h"
-#include "comm/cpu_instr.h"
 #include "cpu/cpu.h"
 #include "cpu/irq.h"
 #include "dev/time.h"
 #include "tools/log.h"
 #include "os_cfg.h"
-#include "tools/klib.h"
 #include "core/task.h"
+#include "tools/list.h"
+#include "ipc/sem.h"
 
 static boot_info_t *init_boot_info;        // 启动信息
 
@@ -26,17 +27,35 @@ void kernel_init(boot_info_t *boot_info) {
 	log_init();
 	irq_init();
 	time_init();
+	task_manager_init();
 }
 
-static task_t first_task;
-static task_t second_task;
-static uint32_t second_task_stack[1024];
+static task_t son_task;
+static uint32_t son_task_stack[1024];
+static sem_t sem;
 
-void init_task_entry(void) {
+void son_task_entry(void) {
 	int count = 0;
 	for (;;) {
-		log_printf("second task: %d", count++);
-		task_switch_from_to(&second_task, &first_task);
+		// sem_p(&sem);
+		log_printf("son task: %d", count++);
+		// task_switch_from_to(&son_task, task_init_task());
+		// sys_sched_yield();
+		sys_sleep(500);
+	}
+}
+
+void list_test() {
+	struct type_t {
+		int i;
+		list_node_t node;
+	} v = {0x123456};
+	list_node_t *v_node = &v.node;
+	struct type_t *p = list_node_parent(v_node, struct type_t, node);
+	if (p->i != 0x123456) {
+		log_printf("list_node_parent error");
+	} else {
+		log_printf("list_node_parent success");
 	}
 }
 
@@ -44,15 +63,24 @@ void init_main(void) {
 	log_printf("Kernel is running....");
 	log_printf("Version: %s", OS_VERSION);
 
+	list_test();
+	
 	// int a = 3 / 0;
 	// irq_enable_global();
-	task_init(&first_task, 0, 0);
-	write_tr(first_task.tss_selector);
 
-	task_init(&second_task, (uint32_t)init_task_entry, (uint32_t) &second_task_stack[1024]);
+	task_init(&son_task, "son task", (uint32_t) son_task_entry, (uint32_t) &son_task_stack[1024]);
+	init_task_init();
+
+	// 初始化信号量 (要在中断开启之前)
+	sem_init(&sem, 0);
+
+	irq_enable_global();
+
 	int count = 0;
 	for (;;) {
-		log_printf("first main: %d", count++);
-		task_switch_from_to(&first_task, &second_task);
+		log_printf("init task: %d", count++);
+		// task_switch_from_to(task_init_task(), &son_task);
+		// sem_v(&sem);
+		sys_sleep(1000);
 	}
 }

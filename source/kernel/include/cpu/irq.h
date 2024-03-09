@@ -1,11 +1,10 @@
 /**
  * 中断处理
- *
- * 作者：李述铜
- * 联系邮箱: 527676163@qq.com
  */
 #ifndef IRQ_H
 #define IRQ_H
+
+#include "comm/types.h"
 
 // 中断号码
 #define IRQ0_DE             0
@@ -98,5 +97,8 @@ void irq_enable_global(void);
 
 void pic_send_eoi(int irq);
 
+typedef uint32_t irq_state_t;
+irq_state_t irq_enter_protection();
+void irq_leave_protection(irq_state_t state);
 
 #endif
