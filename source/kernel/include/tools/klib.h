@@ -4,6 +4,14 @@
 #include <stdarg.h>
 #include "comm/types.h"
 
+static inline uint32_t down2(uint32_t n, uint32_t align) {
+	return n & ~(align - 1);
+}
+
+static inline uint32_t up2(uint32_t n, uint32_t align) {
+	return (n + align - 1) & ~(align - 1);
+}
+
 void kernel_strcpy(char *dest, const char *src);
 void kernel_strncpy(char *dest, const char *src, int size);
 int kernel_strncmp(const char *s1, const char *s2, int size);
