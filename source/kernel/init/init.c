@@ -11,7 +11,7 @@
 #include "core/task.h"
 #include "tools/list.h"
 #include "ipc/sem.h"
-#include "cpu/memory.h"
+#include "kernel/include/core/memory.h"
 
 static boot_info_t *init_boot_info;        // 启动信息
 

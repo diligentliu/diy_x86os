@@ -18,6 +18,13 @@ typedef struct _addr_alloc_t {
 	uint32_t page_size;
 } addr_alloc_t;
 
+typedef struct _memory_map_t {
+	void *vstart;
+	void *vend;
+	void *pstart;
+	uint32_t perm;
+} memory_map_t;
+
 void memory_init(boot_info_t *boot_info);
 
 #endif //OS_MEMORY_H
