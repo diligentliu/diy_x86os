@@ -8,6 +8,7 @@
 #include "loader.h"
 #include "comm/elf.h"
 #include "comm/cpu_instr.h"
+#include "core/memory.h"
 
 /**
 * 使用LBA48位模式读取磁盘
@@ -86,6 +87,26 @@ static void die(int code) {
 	for (;;) {}
 }
 
+#define PDE_PRESENT     (1 << 0)
+#define PDE_RW          (1 << 1)
+#define PDE_PS		    (1 << 7)
+#define CR4_PSE         (1 << 4)
+#define CR0_PG          (1 << 31)
+void enable_page_mode(void) {
+	// 页目录表和页表的起始地址
+	static uint32_t page_dir[1024] __attribute__((aligned(MEM_PAGE_SIZE))) = {
+		[0] = PDE_PRESENT | PDE_RW | PDE_PS | 0,
+	};
+
+	uint32_t cr4 = read_cr4();
+	write_cr4(cr4 | CR4_PSE);
+
+	write_cr3((uint32_t) page_dir);
+
+	uint32_t cr0 = read_cr0();
+	write_cr0(cr0 | CR0_PG);
+}
+
 /**
  * 从磁盘上加载内核
  */
@@ -100,6 +121,8 @@ void load_kernel(void) {
 	if (kernel_entry == 0) {
 		die(-1);
 	}
+
+	enable_page_mode();
 
 	((void (*)(boot_info_t *)) kernel_entry)(&boot_info);
 	for (;;) {}
