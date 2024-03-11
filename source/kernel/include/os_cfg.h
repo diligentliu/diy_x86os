@@ -11,7 +11,7 @@
 
 #define OS_TICKS_MS                 10                // 每毫秒的时钟数
 
-#define IDLE_TASK_STACK_SIZE		1024              // 空闲任务栈大小
+#define IDLE_TASK_STACK_SIZE        1024              // 空闲任务栈大小
 
 #define OS_VERSION                  "0.0.1"           // OS版本号
 
