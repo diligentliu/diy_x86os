@@ -11,7 +11,7 @@
 #include "core/task.h"
 #include "tools/list.h"
 #include "ipc/sem.h"
-#include "kernel/include/core/memory.h"
+#include "core/memory.h"
 
 static boot_info_t *init_boot_info;        // 启动信息
 
@@ -66,7 +66,7 @@ void init_main(void) {
 	log_printf("Version: %s", OS_VERSION);
 
 	list_test();
-	
+
 	// int a = 3 / 0;
 	// irq_enable_global();
 

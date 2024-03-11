@@ -5,6 +5,8 @@
 #include "tools/log.h"
 #include "comm/cpu_instr.h"
 #include "cpu/irq.h"
+#include "cpu/mmu.h"
+#include "core/memory.h"
 
 static task_manager_t task_manager;
 static uint32_t idle_task_stack[IDLE_TASK_STACK_SIZE];
@@ -17,20 +19,30 @@ static int tss_init(task_t *task, uint32_t entry, uint32_t esp) {
 	}
 
 	segment_desc_set(tss_selector, (uint32_t) &task->tss, sizeof(tss_t),
-					 SEG_P_PRESENT | SEG_DPL0 | SEG_TYPE_TSS);
+	                 SEG_P_PRESENT | SEG_DPL0 | SEG_TYPE_TSS);
 	kernel_memset(&task->tss, 0, sizeof(tss_t));
 	task->tss.eip = entry;
 	task->tss.esp = task->tss.esp0 = esp;
 	task->tss.ss = task->tss.ss0 = KERNEL_SELECTOR_DS;
 	task->tss.es = task->tss.fs = task->tss.gs = task->tss.ds = KERNEL_SELECTOR_DS;
 	task->tss.cs = KERNEL_SELECTOR_CS;
-	task->tss.eflags = EFALGS_IF | EFLAGS_DEFAULT;
+	task->tss.eflags = EFLAGS_IF | EFLAGS_DEFAULT;
+	task->tss.iomap = 0;
+
+	// 页表初始化
+	uint32_t page_dir = memory_create_uvm();
+	if (page_dir == 0) {
+		gdt_free_sel(tss_selector);
+		return -1;
+	}
+	task->tss.cr3 = page_dir;
+
 	task->tss_selector = tss_selector;
 	return 0;
 }
 
 int task_init(task_t *task, const char *name, uint32_t entry, uint32_t esp) {
-	ASSERT(task != (task_t *)(0));
+	ASSERT(task != (task_t *) (0));
 
 	tss_init(task, entry, esp);
 	// uint32_t *pesp = (uint32_t *) esp;
@@ -75,14 +87,14 @@ static void idle_task_entry() {
 }
 
 void task_manager_init() {
-	task_manager.current = (task_t *)0;
+	task_manager.current = (task_t *) 0;
 	list_init(&task_manager.sleep_list);
 	list_init(&task_manager.ready_list);
 	list_init(&task_manager.task_list);
 
 	task_init(&task_manager.idle_task, "idle",
-			  (uint32_t) idle_task_entry,
-			  (uint32_t) &idle_task_stack[IDLE_TASK_STACK_SIZE]);
+	          (uint32_t) idle_task_entry,
+	          (uint32_t) &idle_task_stack[IDLE_TASK_STACK_SIZE]);
 }
 
 void init_task_init() {
@@ -146,7 +158,7 @@ void task_dispatch() {
 	irq_state_t state = irq_enter_protection();
 
 	task_t *to = task_next_run();
-	if (to == (task_t *)0 || to == task_current()) {
+	if (to == (task_t *) 0 || to == task_current()) {
 		return;
 	}
 	task_t *from = task_current();

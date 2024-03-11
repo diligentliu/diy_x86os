@@ -51,9 +51,9 @@ list_node_t *list_pop_front(list_t *list);
 list_node_t *list_ease(list_t *list, list_node_t *node);
 
 #define parent_addr(member_ptr, parent_type, member) \
-	((parent_type *)((uint32_t)member_ptr - (uint32_t)&((parent_type *)0)->member))
+    ((parent_type *)((uint32_t)member_ptr - (uint32_t)&((parent_type *)0)->member))
 
 #define list_node_parent(node, parent_type, member) \
-	(parent_type *) (node ? parent_addr(node, parent_type, member) : 0)
+    (parent_type *) (node ? parent_addr(node, parent_type, member) : 0)
 
 #endif //OS_LIST_H

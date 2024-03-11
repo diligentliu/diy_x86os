@@ -1,14 +1,13 @@
 /* 参考文档： https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html */
 SECTIONS
 {
-	PROVIDE(kernel_base = .);
-    . = 0x00010000;
+	PROVIDE(kernel_base = 0x0);
+	. = 0x00010000;
 
 	PROVIDE(s_text = .);
 	.text : {
 		*(.text)
-	} 
-
+	}
 	.rodata : {
 		*(.rodata)
 	}
@@ -22,6 +21,5 @@ SECTIONS
 	.bss : {
 		*(.bss)
 	}
-
-	PROVIDE(kernel_end = .);
+	PROVIDE(mem_free_start = .);
 }
