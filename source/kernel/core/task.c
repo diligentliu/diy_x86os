@@ -45,19 +45,6 @@ int task_init(task_t *task, const char *name, uint32_t entry, uint32_t esp) {
 	ASSERT(task != (task_t *) (0));
 
 	tss_init(task, entry, esp);
-	// uint32_t *pesp = (uint32_t *) esp;
-	// if (pesp) {
-	// 	*(--pesp) = entry;
-	// 	*(--pesp) = 0;
-	// 	*(--pesp) = 0;
-	// 	*(--pesp) = 0;
-	// 	*(--pesp) = 0;
-	// 	task->stack = pesp;
-	// 	return 0;
-	// } else {
-	// 	log_printf("task_init: esp is null");
-	// 	return -1;
-	// }
 
 	kernel_strncpy(task->name, name, TASK_NAME_SIZE);
 	task->state = TASK_CREATED;
@@ -97,14 +84,29 @@ void task_manager_init() {
 	          (uint32_t) &idle_task_stack[IDLE_TASK_STACK_SIZE]);
 }
 
-void init_task_init() {
-	task_init(&task_manager.init_task, "init", 0, 0);
-	write_tr(task_manager.init_task.tss_selector);
-	task_manager.current = &task_manager.init_task;
+void first_task_init() {
+	void first_task_entry();
+	extern uint8_t s_first_task[], e_first_task[];
+
+	uint32_t copy_size = (uint32_t)(e_first_task - s_first_task);
+	uint32_t alloc_size = 10 * MEM_PAGE_SIZE;
+	ASSERT(copy_size < alloc_size);
+
+	uint32_t first_start = (uint32_t) first_task_entry;
+
+	task_init(&task_manager.first_task, "first task", first_start, 0);
+	task_manager.current = &task_manager.first_task;
+
+	mmu_set_page_dir(task_manager.first_task.tss.cr3);
+
+	memory_alloc_page_for(first_start, alloc_size, PTE_P | PTE_W);
+	kernel_memcpy((void *) first_start, (void *) s_first_task, copy_size);
+	
+	write_tr(task_manager.first_task.tss_selector);
 }
 
-task_t *task_init_task() {
-	return &task_manager.init_task;
+task_t *task_first_task() {
+	return &task_manager.first_task;
 }
 
 void task_set_ready(task_t *task) {
