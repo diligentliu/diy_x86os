@@ -41,13 +41,13 @@ typedef struct _task_manager_t {
 	list_t ready_list;      // 就绪任务
 	list_t task_list;       // 所有任务
 	list_t sleep_list;      // 睡眠任务
-	task_t init_task;       // 初始化任务
+	task_t first_task;       // 初始化任务
 	task_t idle_task;       // 空闲任务
 } task_manager_t;
 
 void task_manager_init();
-void init_task_init();
-task_t *task_init_task();
+void first_task_init();
+task_t *task_first_task();
 void task_set_ready(task_t *task);
 void task_set_block(task_t *task);
 task_t *task_current();

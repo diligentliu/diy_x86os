@@ -4,7 +4,6 @@
 #include "tools/klib.h"
 #include "tools/log.h"
 #include "core/memory.h"
-#include "tools/klib.h"
 #include "cpu/mmu.h"
 
 static addr_alloc_t paddr_alloc;        // 物理地址分配结构
@@ -143,12 +142,12 @@ void create_kernel_table(void) {
 	// 地址映射表, 用于建立内核级的地址映射
 	// 地址不变，但是添加了属性
 	static memory_map_t kernel_map[] = {
-			{kernel_base, s_text, 0, PTE_W},                                // 内核栈区
-			{s_text, e_text, s_text, 0},                                    // 内核代码区
-			{s_data, (void *) (MEM_EBDA_START - 1), s_data, PTE_W},         // 内核数据区
+			{kernel_base,            s_text,                        0,                      PTE_W},                                // 内核栈区
+			{s_text,                 e_text,                        s_text, 0},                                    // 内核代码区
+			{s_data,                 (void *) (MEM_EBDA_START - 1), s_data,                 PTE_W},         // 内核数据区
 
 			// 扩展存储空间一一映射，方便直接操作
-			{(void *) MEM_EXT_START, (void *) MEM_EXT_END, (void *) MEM_EXT_START, PTE_W},
+			{(void *) MEM_EXT_START, (void *) MEM_EXT_END,          (void *) MEM_EXT_START, PTE_W},
 	};
 
 	// 清空页目录表
@@ -199,7 +198,7 @@ void memory_init(boot_info_t *boot_info) {
 	// 1MB内存空间起始，在链接脚本中定义
 	extern uint8_t *mem_free_start;
 
-	log_printf("mem init.");
+	log_printf("memory init...");
 	show_mem_info(boot_info);
 
 	// 在内核数据后面放物理页位图
@@ -223,4 +222,43 @@ void memory_init(boot_info_t *boot_info) {
 
 	// 先切换到当前页表
 	mmu_set_page_dir((uint32_t) kernel_page_dir);
+}
+
+/**
+ * @brief 为指定的虚拟地址空间分配多页内存
+ * @param addr 起始地址
+ * @param size 大小
+ * @param perm 权限
+ * @return 0表示成功，-1表示失败
+ */
+int memory_alloc_page_for(uint32_t addr, uint32_t size, uint32_t perm) {
+	return memory_alloc_for_page_dir(task_current()->tss.cr3, addr, size, perm);
+}
+
+int memory_alloc_for_page_dir(uint32_t page_dir, uint32_t vaddr, uint32_t size, uint32_t perm) {
+	uint32_t curr_vaddr = vaddr;
+	int page_count = up2(size, MEM_PAGE_SIZE) / MEM_PAGE_SIZE;
+	vaddr = down2(vaddr, MEM_PAGE_SIZE);
+
+	// 逐页分配内存，然后建立映射关系
+	for (int i = 0; i < page_count; i++) {
+		// 分配需要的内存
+		uint32_t paddr = addr_alloc_page(&paddr_alloc, 1);
+		if (paddr == 0) {
+			log_printf("memory alloc failed. no memory");
+			return 0;
+		}
+
+		// 建立分配的内存与指定地址的关联
+		int err = memory_create_map((pde_t *) page_dir, curr_vaddr, paddr, 1, perm);
+		if (err < 0) {
+			log_printf("create memory map failed. err = %d", err);
+			addr_free_page(&paddr_alloc, vaddr, i + 1);
+			return -1;
+		}
+
+		curr_vaddr += MEM_PAGE_SIZE;
+	}
+
+	return 0;
 }
