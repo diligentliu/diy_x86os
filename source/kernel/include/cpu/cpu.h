@@ -16,6 +16,9 @@
 #define SEG_DPL0            (0 << 5)        // 特权级0，最高特权级
 #define SEG_DPL3            (3 << 5)        // 特权级3，最低权限
 
+#define SEG_CPL0            0                // 特权级0
+#define SEG_CPL3            3                // 特权级3
+
 #define SEG_S_SYSTEM        (0 << 4)        // 是否是系统段，如调用门或者中断
 #define SEG_S_NORMAL        (1 << 4)        // 普通的代码段或数据段
 

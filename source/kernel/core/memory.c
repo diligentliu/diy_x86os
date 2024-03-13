@@ -91,7 +91,7 @@ pte_t *find_pte(pde_t *page_dir, uint32_t vaddr, int alloc) {
 		}
 
 		// 设置为用户可读写，将被pte中设置所覆盖
-		pde->v = pg_paddr | PTE_P | PTE_W;
+		pde->v = pg_paddr | PDE_P | PDE_W | PDE_U;
 
 		// 为物理页表绑定虚拟地址的映射，这样下面就可以计算出虚拟地址了
 		//kernel_pg_last[pde_index(vaddr)].v = pg_paddr | PTE_P | PTE_W;
@@ -261,4 +261,29 @@ int memory_alloc_for_page_dir(uint32_t page_dir, uint32_t vaddr, uint32_t size, 
 	}
 
 	return 0;
+}
+
+/**
+ * @brief 分配一页内存
+ */
+uint32_t memory_alloc_page() {
+	return addr_alloc_page(&paddr_alloc, 1);
+}
+
+static pde_t *curr_page_dir() {
+	return (pde_t *) (task_current()->tss.cr3);
+}
+
+/**
+ * @brief 释放一页内存
+ */
+void memory_free_page(uint32_t addr) {
+	if (addr < MEMORY_TASK_BASE) {
+		addr_free_page(&paddr_alloc, addr, 1);
+	} else {
+		pte_t *pte = find_pte(curr_page_dir(), addr, 0);
+		ASSERT(pte != (pte_t *) 0 && pte->present);
+		addr_free_page(&paddr_alloc, pte_paddr(pte), 1);
+		pte->v = 0;
+	}
 }

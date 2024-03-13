@@ -29,6 +29,13 @@
 
 #define IRQ0_TIMER          0x20
 
+#define ERR_PAGE_P          (1 << 0)        // 存在
+#define ERR_PAGE_WR         (1 << 1)        // 可写
+#define ERR_PAGE_US         (1 << 1)        // USER 特权级
+
+#define ERR_EXT             (1 << 0)        // 外部中断
+#define ERR_IDT             (1 << 1)        // IDT 中断
+
 /**
  * 中断发生时相应的栈结构，暂时为无特权级发生的情况
  */
@@ -39,6 +46,7 @@ typedef struct _exception_frame_t {
 	int num;
 	int error_code;
 	int eip, cs, eflags;
+	uint32_t esp3, ss3;
 } exception_frame_t;
 
 typedef void(*irq_handler_t)(void);
