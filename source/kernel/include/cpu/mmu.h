@@ -9,8 +9,11 @@
 
 #define PDE_CNT             1024
 #define PTE_P               (1 << 0)
-#define PTE_W               (1 << 1)
 #define PDE_P               (1 << 0)
+#define PTE_W               (1 << 1)
+#define PDE_W               (1 << 1)
+#define PTE_U               (1 << 2)
+#define PDE_U               (1 << 2)
 
 #pragma pack(1)
 /**
