@@ -287,3 +287,62 @@ void memory_free_page(uint32_t addr) {
 		pte->v = 0;
 	}
 }
+
+uint32_t memory_copy_uvm(uint32_t page_dir) {
+	uint32_t new_page_dir = memory_create_uvm();
+	if (new_page_dir == 0) {
+		goto copy_uvm_failed;
+	}
+
+	uint32_t user_pde_start = pde_index(MEMORY_TASK_BASE);
+	pde_t *pde = (pde_t *) page_dir + user_pde_start;
+	for (int i = user_pde_start; i < PDE_CNT; i++, pde++) {
+		if (!pde->present) {
+			continue;
+		}
+		pte_t *pte = (pte_t *) pde_paddr(pde);
+		for (int j = 0; j < PTE_CNT; ++j, pte++) {
+			if (!pte->present) {
+				continue;
+			}
+			uint32_t page = memory_alloc_page();
+			if (page == 0) {
+				goto copy_uvm_failed;
+			}
+			uint32_t vaddr = (i << 22) + (j << 12);
+			int err = memory_create_map((pde_t *) new_page_dir, vaddr, page, 1, get_pte_perm(pte));
+			if (err < 0) {
+				goto copy_uvm_failed;
+			}
+
+			kernel_memcpy((void *) page, (void *) vaddr, MEM_PAGE_SIZE);
+		}
+	}
+
+	return new_page_dir;
+copy_uvm_failed:
+	if (new_page_dir != 0) {
+		memory_destroy_uvm(new_page_dir);
+	}
+	return 0;
+}
+
+void memory_destroy_uvm(uint32_t page_dir) {
+	uint32_t user_pde_start = pde_index(MEMORY_TASK_BASE);
+	pde_t *pde = (pde_t *) page_dir + user_pde_start;
+	for (int i = user_pde_start; i < PDE_CNT; i++, pde++) {
+		if (!pde->present) {
+			continue;
+		}
+		pte_t *pte = (pte_t *) pde_paddr(pde);
+		for (int j = 0; j < PTE_CNT; ++j, pte++) {
+			if (!pte->present) {
+				continue;
+			}
+			addr_free_page(&paddr_alloc, pte_paddr(pte), 1);
+		}
+
+		addr_free_page(&paddr_alloc, pde_paddr(pde), 1);
+	}
+	addr_free_page(&paddr_alloc, page_dir, 1);
+}

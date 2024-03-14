@@ -21,6 +21,7 @@ typedef struct _task_t {
 	} state;
 
 	int pid;
+	struct _task_t *parent;
 
 	int sleep_ticks;
 	int time_ticks;
@@ -66,5 +67,6 @@ void task_set_sleep(task_t *task, uint32_t ticks);
 void task_set_wakeup(task_t *task);
 void sys_sleep(uint32_t ms);
 uint32_t sys_getpid();
+uint32_t sys_fork();
 
 #endif //OS_TASK_H

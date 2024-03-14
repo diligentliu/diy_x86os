@@ -5,7 +5,11 @@
 
 #define SYS_sleep               0
 #define SYS_getpid              1
-#define SYS_print_msg           2
+#define SYS_fork                2
+
+
+#define SYS_print_msg           100
+
 #define SYSCALL_PARAM_COUNT     5
 
 typedef struct _syscall_frame_t {

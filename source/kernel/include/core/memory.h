@@ -43,6 +43,8 @@ int memory_alloc_page_for(uint32_t addr, uint32_t size, uint32_t perm);
 int memory_alloc_for_page_dir(uint32_t page_dir, uint32_t vaddr, uint32_t size, uint32_t perm);
 uint32_t memory_alloc_page();
 void memory_free_page(uint32_t addr);
+uint32_t memory_copy_uvm(uint32_t page_dir);
+void memory_destroy_uvm(uint32_t page_dir);
 
 
 #endif // MEMORY_H
