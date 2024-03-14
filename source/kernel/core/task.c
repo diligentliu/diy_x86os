@@ -80,6 +80,7 @@ int task_init(task_t *task, const char *name, int flag, uint32_t entry, uint32_t
 	list_node_init(&task->all_node);
 
 	irq_state_t state = irq_enter_protection();
+	task->pid = (uint32_t) task;
 	task_set_ready(task);
 	list_push_back(&task_manager.task_list, &task->all_node);
 	irq_leave_protection(state);
@@ -253,4 +254,8 @@ void sys_sleep(uint32_t ms) {
 	task_set_sleep(current, (ms + (OS_TICKS_MS - 1)) / OS_TICKS_MS);
 	task_dispatch();
 	irq_leave_protection(state);
+}
+
+uint32_t sys_getpid() {
+	return task_current()->pid;
 }
