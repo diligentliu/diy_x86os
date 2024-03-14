@@ -11,6 +11,7 @@
  	.global _start
 	.extern kernel_init
 	.extern init_main
+	.extern do_handler_syscall
 _start:
     // 第一种方法
     // push %ebp
@@ -70,7 +71,7 @@ gdt_reload:
 		push $\num
 
 		// 保存所有寄存器
-		pushal
+		pusha
 		push %ds
 		push %es
 		push %fs
@@ -86,7 +87,7 @@ gdt_reload:
 		pop %fs
 		pop %es
 		pop %ds
-		popal
+		popa
 
 		// 跳过压入的异常号和错误码
 		add $(2*4), %esp
@@ -139,3 +140,26 @@ simple_switch:
 	pop %ebx
 	pop %ebp
 	ret
+
+	.global exception_handler_syscall
+exception_handler_syscall:
+	pusha
+	push %ds
+	push %es
+	push %fs
+	push %gs
+	pushf
+
+	mov %esp, %eax
+	push %eax
+	call do_handler_syscall
+	add $(1*4), %esp		// 丢掉esp
+
+	popf
+	pop %gs
+    pop %fs
+    pop %es
+    pop %ds
+    popa
+
+	retf $(5 * 4)
