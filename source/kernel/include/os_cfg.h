@@ -16,4 +16,6 @@
 
 #define OS_VERSION                  "0.0.1"           // OS版本号
 
+#define TASK_NR_MAX                 128               // 最大任务数量
+
 #endif //OS_OS_CFG_H

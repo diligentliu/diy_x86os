@@ -54,4 +54,9 @@ static inline void print_msg(const char *fmt, int arg) {
 	sys_call(&args);
 }
 
+static inline int fork() {
+	syscall_args_t args = {SYS_fork, 0, 0, 0, 0};
+	return sys_call(&args);
+}
+
 #endif //OS_LIB_SYSCALL_H

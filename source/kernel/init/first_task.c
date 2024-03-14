@@ -3,9 +3,21 @@
 #include "applib/lib_syscall.h"
 
 int first_task_main() {
-	int pid = getpid();
+	print_msg("first_task_main, pid: %d", getpid());
 	int count = 0;
-	print_msg("first_task_main, pid: %d", pid);
+	int pid = fork();
+	if (pid == 0) {
+		++count;
+		print_msg("child task, pid: %d", getpid());
+		print_msg("count = %d", count);
+	} else if (pid > 0) {
+		++count;
+		print_msg("parent task, pid: %d", getpid());
+		print_msg("count = %d", count);
+	} else {
+		print_msg("fork failed", 0);
+	}
+
 	while (1) {
 		print_msg("first_task_main, %d", ++count);
 		msleep(1000);
