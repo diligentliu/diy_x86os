@@ -31,4 +31,7 @@ void panic(const char *file, int line, const char *func, const char *cond);
 #define ASSERT(condition)    ((void)0)
 #endif
 
+char *get_file_name(const char *path);
+int strings_count(char **start);
+
 #endif

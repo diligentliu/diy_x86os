@@ -74,12 +74,12 @@
                 //     "text": "add-symbol-file ./build/source/init/init.elf 0x82000000",
                 //     "ignoreFailures": false
                 // },
-                // {
-                //     "description": "加载shell符号文件",
-                //     // 为了方便调试，不同应用的起始地址应当不同，这样才能正确单步调度和设置断点
-                //     "text": "add-symbol-file ./build/source/shell/shell.elf 0x81000000",
-                //     "ignoreFailures": false
-                // },
+                {
+                    "description": "加载shell符号文件",
+                    // 为了方便调试，不同应用的起始地址应当不同，这样才能正确单步调度和设置断点
+                    "text": "add-symbol-file ./build/source/shell/shell.elf 0x81000000",
+                    "ignoreFailures": false
+                },
                 // {
                 //     "description": "加载loop符号文件",
                 //     // 为了方便调试，不同应用的起始地址应当不同，这样才能正确单步调度和设置断点

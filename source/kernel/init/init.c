@@ -34,17 +34,17 @@ void move_to_first_task(void) {
 
 	tss_t *tss = &current_task->tss;
 	__asm__ __volatile__ (
-		"push %[ss]\n\t"
-		"push %[esp]\n\t"
-		"push %[eflags]\n\t"
-		"push %[cs]\n\t"
-		"push %[eip]\n\t"
-		"iret"
-		::[ss]"r"(tss->ss),
-		  [esp]"r"(tss->esp),
-		  [eflags]"r"(tss->eflags),
-		  [cs]"r"(tss->cs),
-		  [eip]"r"(tss->eip)
+			"push %[ss]\n\t"
+			"push %[esp]\n\t"
+			"push %[eflags]\n\t"
+			"push %[cs]\n\t"
+			"push %[eip]\n\t"
+			"iret"
+			::[ss]"r"(tss->ss),
+	[esp]"r"(tss->esp),
+	[eflags]"r"(tss->eflags),
+	[cs]"r"(tss->cs),
+	[eip]"r"(tss->eip)
 	);
 }
 

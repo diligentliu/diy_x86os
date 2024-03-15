@@ -209,3 +209,35 @@ void panic(const char *file, int line, const char *func, const char *cond) {
 		hlt();
 	}
 }
+
+char *get_file_name(const char *path) {
+	if (!path) {
+		return (char *) 0;
+	}
+
+	const char *p = path;
+	const char *start = p;
+	while (*p) {
+		if (*p == '/' || *p == '\\') {
+			start = p + 1;
+		}
+		p++;
+	}
+
+	return (char *) start;
+}
+
+/**
+ * @brief 计算字符串的数量
+ */
+int strings_count(char **start) {
+	int count = 0;
+
+	char **p = start;
+	if (p) {
+		while (*p++) {
+			count++;
+		}
+	}
+	return count;
+}
