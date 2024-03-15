@@ -288,7 +288,7 @@ void memory_free_page(uint32_t addr) {
 	}
 }
 
-uint32_t memory_copy_uvm(uint32_t page_dir) {
+int memory_copy_uvm(uint32_t page_dir) {
 	uint32_t new_page_dir = memory_create_uvm();
 	if (new_page_dir == 0) {
 		goto copy_uvm_failed;
@@ -324,7 +324,7 @@ copy_uvm_failed:
 	if (new_page_dir != 0) {
 		memory_destroy_uvm(new_page_dir);
 	}
-	return 0;
+	return -1;
 }
 
 void memory_destroy_uvm(uint32_t page_dir) {
@@ -345,4 +345,46 @@ void memory_destroy_uvm(uint32_t page_dir) {
 		addr_free_page(&paddr_alloc, pde_paddr(pde), 1);
 	}
 	addr_free_page(&paddr_alloc, page_dir, 1);
+}
+
+/**
+ * @brief 获取指定虚拟地址的物理地址
+ * 如果转换失败，返回0。
+ */
+uint32_t memory_get_paddr(uint32_t page_dir, uint32_t vaddr) {
+	pte_t *pte = find_pte((pde_t *) page_dir, vaddr, 0);
+	if (pte == (pte_t *) 0) {
+		return 0;
+	}
+
+	return pte_paddr(pte) + (vaddr & (MEM_PAGE_SIZE - 1));
+}
+
+/**
+ * @brief 在不同的进程空间中拷贝字符串
+ * page_dir为目标页表，当前仍为老页表
+ */
+int memory_copy_uvm_data(uint32_t to, uint32_t page_dir, uint32_t from, uint32_t size) {
+	while (size > 0) {
+		// 获取目标的物理地址, 也即其另一个虚拟地址
+		uint32_t to_paddr = memory_get_paddr(page_dir, to);
+		if (to_paddr == 0) {
+			return -1;
+		}
+
+		// 计算当前可拷贝的大小
+		uint32_t offset_in_page = to_paddr & (MEM_PAGE_SIZE - 1);
+		uint32_t curr_size = MEM_PAGE_SIZE - offset_in_page;
+		if (curr_size > size) {
+			curr_size = size;       // 如果比较大，超过页边界，则只拷贝此页内的
+		}
+
+		kernel_memcpy((void *) to_paddr, (void *) from, curr_size);
+
+		size -= curr_size;
+		to += curr_size;
+		from += curr_size;
+	}
+
+	return 0;
 }

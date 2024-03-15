@@ -15,6 +15,9 @@
 
 #define MEMORY_TASK_BASE            (0x80000000)            // 进程起始地址空间
 
+#define MEM_TASK_STACK_TOP            (0xE0000000)            // 任务栈顶
+#define MEM_TASK_STACK_SIZE            (MEM_PAGE_SIZE * 500)   // 任务栈大小
+#define MEM_TASK_ARG_SIZE            (MEM_PAGE_SIZE * 4)    // 任务参数大小
 /**
  * @brief 地址分配结构
  */
@@ -43,8 +46,9 @@ int memory_alloc_page_for(uint32_t addr, uint32_t size, uint32_t perm);
 int memory_alloc_for_page_dir(uint32_t page_dir, uint32_t vaddr, uint32_t size, uint32_t perm);
 uint32_t memory_alloc_page();
 void memory_free_page(uint32_t addr);
-uint32_t memory_copy_uvm(uint32_t page_dir);
+int memory_copy_uvm(uint32_t page_dir);
 void memory_destroy_uvm(uint32_t page_dir);
-
+uint32_t memory_get_paddr(uint32_t page_dir, uint32_t vaddr);
+int memory_copy_uvm_data(uint32_t to, uint32_t page_dir, uint32_t from, uint32_t size);
 
 #endif // MEMORY_H

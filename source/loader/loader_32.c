@@ -12,7 +12,7 @@
 /**
 * 使用LBA48位模式读取磁盘
 */
-static void read_disk(int sector, int sector_count, uint8_t *buf) {
+static void read_disk(uint32_t sector, uint32_t sector_count, uint8_t *buf) {
 	outb(0x1F6, (uint8_t) (0xE0));
 
 	outb(0x1F2, (uint8_t) (sector_count >> 8));

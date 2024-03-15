@@ -103,7 +103,7 @@ void do_handler_stack_segment_fault(exception_frame_t *frame) {
 	do_default_handler(frame, "Stack-Segment Fault.");
 }
 
-void do_handler_general_protection(exception_frame_t * frame) {
+void do_handler_general_protection(exception_frame_t *frame) {
 	log_printf("--------------------------------");
 	log_printf("IRQ/Exception happend: General Protection.");
 	if (frame->error_code & ERR_EXT) {
@@ -130,7 +130,7 @@ void do_handler_general_protection(exception_frame_t * frame) {
 	}
 }
 
-void do_handler_page_fault(exception_frame_t * frame) {
+void do_handler_page_fault(exception_frame_t *frame) {
 	log_printf("--------------------------------");
 	log_printf("IRQ/Exception happend: Page fault.");
 	if (frame->error_code & ERR_PAGE_P) {

@@ -10,6 +10,12 @@
 
 #define TASK_FLAG_SYSTEM     (1 << 0)
 
+typedef struct _task_args_t {
+	uint32_t return_addr;
+	uint32_t argc;
+	char **argv;
+} task_args_t;
+
 typedef struct _task_t {
 	// uint32_t *stack;
 	enum {
@@ -66,7 +72,8 @@ void task_time_tick();
 void task_set_sleep(task_t *task, uint32_t ticks);
 void task_set_wakeup(task_t *task);
 void sys_sleep(uint32_t ms);
-uint32_t sys_getpid();
-uint32_t sys_fork();
+int sys_getpid();
+int sys_fork();
+int sys_execve(char *name, char **argv, char **env);
 
 #endif //OS_TASK_H

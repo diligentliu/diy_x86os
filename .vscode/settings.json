@@ -12,6 +12,9 @@
         "loader.h": "c",
         "klib.h": "c",
         "list.h": "c",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "mmu.h": "c",
+        "memory.h": "c",
+        "bitmap.h": "c"
     },
 }

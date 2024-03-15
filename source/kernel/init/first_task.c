@@ -10,6 +10,9 @@ int first_task_main() {
 		++count;
 		print_msg("child task, pid: %d", getpid());
 		print_msg("count = %d", count);
+
+		char *argv[] = {"arg0", "arg1", "arg2", "arg3"};
+		execve("/shell.elf", argv, (char **) 0);
 	} else if (pid > 0) {
 		++count;
 		print_msg("parent task, pid: %d", getpid());

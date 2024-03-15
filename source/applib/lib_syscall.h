@@ -26,12 +26,12 @@ static inline int sys_call(syscall_args_t *args) {
 			"push %[id]\n\t"
 			"lcall *(%[a])"
 			:"=a"(ret):
-			[arg3]"r"(args->arg3),
-			[arg2]"r"(args->arg2),
-			[arg1]"r"(args->arg1),
-			[arg0]"r"(args->arg0),
-			[id]"r"(args->id),
-			[a]"r"(addr)
+	[arg3]"r"(args->arg3),
+	[arg2]"r"(args->arg2),
+	[arg1]"r"(args->arg1),
+	[arg0]"r"(args->arg0),
+	[id]"r"(args->id),
+	[a]"r"(addr)
 	);
 	return ret;
 }
@@ -56,6 +56,11 @@ static inline void print_msg(const char *fmt, int arg) {
 
 static inline int fork() {
 	syscall_args_t args = {SYS_fork, 0, 0, 0, 0};
+	return sys_call(&args);
+}
+
+static inline int execve(const char *path, char *const argv[], char *const envp[]) {
+	syscall_args_t args = {SYS_execve, (uint32_t) path, (uint32_t) argv, (uint32_t) envp, 0};
 	return sys_call(&args);
 }
 

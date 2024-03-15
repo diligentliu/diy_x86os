@@ -86,7 +86,7 @@ void init_gdt(void) {
 
 	// 调用门
 	gate_desc_set(
-			(gate_desc_t *)(gdt_table + (SELECTOR_SYSCALL >> 3)),
+			(gate_desc_t *) (gdt_table + (SELECTOR_SYSCALL >> 3)),
 			KERNEL_SELECTOR_CS,
 			(uint32_t) exception_handler_syscall,
 			GATE_P_PRESENT | GATE_DPL3 | GATE_TYPE_SYSCALL | SYSCALL_PARAM_COUNT
