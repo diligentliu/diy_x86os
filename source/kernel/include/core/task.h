@@ -65,7 +65,7 @@ task_t *task_first_task();
 void task_set_ready(task_t *task);
 void task_set_block(task_t *task);
 task_t *task_current();
-int sys_sched_yield();
+int sys_yield();
 void task_dispatch();
 void task_time_tick();
 
