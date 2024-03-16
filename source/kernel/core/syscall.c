@@ -2,6 +2,7 @@
 #include "applib/lib_syscall.h"
 #include "core/task.h"
 #include "tools/log.h"
+#include "fs/fs.h"
 
 void sys_print_msg(const char *fmt, int arg) {
 	log_printf(fmt, arg);
@@ -13,6 +14,14 @@ static const syscall_handler_t sys_table[] = {
 		[SYS_getpid] = (syscall_handler_t) sys_getpid,
 		[SYS_fork] = (syscall_handler_t) sys_fork,
 		[SYS_execve] = (syscall_handler_t) sys_execve,
+		[SYS_yield] = (syscall_handler_t) sys_yield,
+
+		[SYS_open] = (syscall_handler_t) sys_open,
+		[SYS_read] = (syscall_handler_t) sys_read,
+		[SYS_write] = (syscall_handler_t) sys_write,
+		[SYS_close] = (syscall_handler_t) sys_close,
+		[SYS_lseek] = (syscall_handler_t) sys_lseek,
+
 		[SYS_print_msg] = (syscall_handler_t) sys_print_msg,
 };
 

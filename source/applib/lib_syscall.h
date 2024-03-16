@@ -36,32 +36,18 @@ static inline int sys_call(syscall_args_t *args) {
 	return ret;
 }
 
-static inline void msleep(int ms) {
-	if (ms <= 0) {
-		return;
-	}
-	syscall_args_t args = {SYS_sleep, ms, 0, 0, 0};
-	sys_call(&args);
-}
+void msleep(int ms);
+int getpid();
+void print_msg(const char *fmt, int arg);
+int fork();
+int execve(const char *path, char *const argv[], char *const envp[]);
+void yield();
 
-static inline int getpid() {
-	syscall_args_t args = {SYS_getpid, 0, 0, 0, 0};
-	return sys_call(&args);
-}
-
-static inline void print_msg(const char *fmt, int arg) {
-	syscall_args_t args = {SYS_print_msg, (uint32_t) fmt, arg, 0, 0};
-	sys_call(&args);
-}
-
-static inline int fork() {
-	syscall_args_t args = {SYS_fork, 0, 0, 0, 0};
-	return sys_call(&args);
-}
-
-static inline int execve(const char *path, char *const argv[], char *const envp[]) {
-	syscall_args_t args = {SYS_execve, (uint32_t) path, (uint32_t) argv, (uint32_t) envp, 0};
-	return sys_call(&args);
-}
+// 文件操作
+int open(const char *name, int flags, ...);
+int read(int file, char *ptr, int len);
+int write(int file, char *ptr, int len);
+int close(int file);
+int lseek(int file, int ptr, int dir);
 
 #endif //OS_LIB_SYSCALL_H
