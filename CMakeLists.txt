@@ -40,9 +40,9 @@ enable_language(ASM)
 
 # 头文件搜索路径
 include_directories(
-    ${PROJECT_SOURCE_DIR}/source
-     ${PROJECT_SOURCE_DIR}/source/kernel/include
-#     ${PROJECT_SOURCE_DIR}/../newlib/i686-elf/include
+        ${PROJECT_SOURCE_DIR}/source
+        ${PROJECT_SOURCE_DIR}/source/kernel/include
+        newlib/i686-elf/include
 )
 
 # 底层的若干子项目：含内核及应用程序
@@ -58,5 +58,6 @@ add_subdirectory(./source/shell)
 # 不加则cmake则可能先编译shell和kernel，而缺少libapp，导致编译错误
 #add_dependencies(init app)
 add_dependencies(shell app)
+add_dependencies(kernel app)
 #add_dependencies(loop app)
 #add_dependencies(kernel init)
