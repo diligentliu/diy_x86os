@@ -75,3 +75,31 @@ int lseek(int file, int ptr, int dir) {
 	args.arg2 = dir;
 	return sys_call(&args);
 }
+
+/**
+ * 获取文件的状态
+ */
+int fstat(int file, struct stat *st) {
+    syscall_args_t args;
+    args.id = SYS_fstat;
+    args.arg0 = (int)file;
+    args.arg1 = (int)st;
+    return sys_call(&args);
+}
+
+/**
+ * 判断文件描述符与tty关联
+ */
+int isatty(int file) {
+    syscall_args_t args;
+    args.id = SYS_isatty;
+    args.arg0 = (int)file;
+    return sys_call(&args);
+}
+
+void * sbrk(ptrdiff_t incr) {
+    syscall_args_t args;
+    args.id = SYS_sbrk;
+    args.arg0 = (int)incr;
+    return (void *)sys_call(&args);
+}

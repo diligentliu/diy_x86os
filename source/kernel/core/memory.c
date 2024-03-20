@@ -388,3 +388,46 @@ int memory_copy_uvm_data(uint32_t to, uint32_t page_dir, uint32_t from, uint32_t
 
 	return 0;
 }
+
+char *sys_sbrk(int incr) {
+	task_t *task = task_current();
+	char *pre_heap_end = (char *) task->heap_end;
+
+	int pre_incr = incr;
+
+	ASSERT(incr >= 0);
+
+	if (incr == 0) {
+		log_printf("sbrk(0)");
+		return pre_heap_end;
+	}
+
+	uint32_t start = task->heap_end;
+	uint32_t end = start + incr;
+	uint32_t start_offset = start & (MEM_PAGE_SIZE - 1);
+	if (start_offset != 0) {
+		if (start_offset + incr <= MEM_PAGE_SIZE) {
+			// 如果在同一页内，直接返回
+			task->heap_end = end;
+			return pre_heap_end;
+		} else {
+			// 如果不在同一页内，需要分配多页
+			int cur_size = MEM_PAGE_SIZE - start_offset;
+			start += cur_size;
+			incr -= cur_size;
+		}
+	}
+
+	if (incr) {
+		uint32_t cur_size = end - start;
+		int err = memory_alloc_page_for(start, cur_size, PTE_P | PTE_W | PTE_U);
+		if (err < 0) {
+			log_printf("sbrk failed. err = %d", err);
+			return (char *) 0;
+		}
+	}
+
+	log_printf("sbrk(%d): end = 0x%x", pre_incr, end);
+	task->heap_end = end;
+	return (char *) pre_heap_end;
+}
