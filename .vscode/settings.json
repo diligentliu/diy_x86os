@@ -17,6 +17,9 @@
         "memory.h": "c",
         "bitmap.h": "c",
         "log.h": "c",
-        "syscall.h": "c"
+        "syscall.h": "c",
+        "boot_info.h": "c",
+        "cpu_instr.h": "c",
+        "fs.h": "c"
     },
 }

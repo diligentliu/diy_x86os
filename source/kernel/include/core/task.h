@@ -28,6 +28,8 @@ typedef struct _task_t {
 
 	int pid;
 	struct _task_t *parent;
+	uint32_t heap_start;
+	uint32_t heap_end;
 
 	int sleep_ticks;
 	int time_ticks;

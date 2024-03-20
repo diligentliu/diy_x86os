@@ -84,6 +84,7 @@ int task_init(task_t *task, const char *name, int flag, uint32_t entry, uint32_t
 	kernel_strncpy(task->name, name, TASK_NAME_SIZE);
 	task->state = TASK_CREATED;
 	task->parent = (task_t *) 0;
+	task->heap_start = task->heap_end = 0;
 	task->sleep_ticks = 0;
 	task->time_ticks = TASK_TIME_SLICE_DEFAULT;
 	task->slice_ticks = TASK_TIME_SLICE_DEFAULT;
@@ -176,6 +177,8 @@ void first_task_init() {
 	          0,
 	          first_start,
 	          alloc_size + first_start);
+	task_manager.first_task.heap_start = (uint32_t) e_first_task;
+	task_manager.first_task.heap_end = (uint32_t) e_first_task;
 	task_manager.current = &task_manager.first_task;
 
 	mmu_set_page_dir(task_manager.first_task.tss.cr3);
@@ -466,6 +469,10 @@ static uint32_t load_elf_file(task_t *task, const char *name, uint32_t page_dir)
 			log_printf("load program hdr failed");
 			goto load_failed;
 		}
+
+		// 简单起见，不检查了，以最后的地址为bss的地址
+		task->heap_start = elf_phdr.p_vaddr + elf_phdr.p_memsz;
+		task->heap_end = task->heap_start;
 	}
 
 	sys_close(file);

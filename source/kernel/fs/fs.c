@@ -2,6 +2,7 @@
 #include "comm/cpu_instr.h"
 #include "comm/boot_info.h"
 #include "tools/klib.h"
+#include "tools/log.h"
 
 static uint8_t TEMP_ADDR[100 * 1024];
 static uint8_t *temp_pos;
@@ -55,8 +56,10 @@ int sys_read(int fd, void *buf, int len) {
 	return -1;
 }
 
-int sys_write(int fd, const void *buf, int len) {
-	return -1;
+int sys_write(int fd, char *buf, int len) {
+	buf[len] = '\0';
+	log_printf("%s", buf);
+	return len;
 }
 
 int sys_lseek(int fd, int offset, int whence) {
@@ -70,4 +73,12 @@ int sys_lseek(int fd, int offset, int whence) {
 
 int sys_close(int fd) {
 	return 0;
+}
+
+int sys_isatty(int fd) {
+	return -1;
+}
+
+int sys_fstat(int fd, struct stat *st) {
+	return -1;
 }
