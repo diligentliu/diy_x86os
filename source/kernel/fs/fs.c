@@ -3,6 +3,7 @@
 #include "comm/boot_info.h"
 #include "tools/klib.h"
 #include "tools/log.h"
+#include "dev/console.h"
 
 static uint8_t TEMP_ADDR[100 * 1024];
 static uint8_t *temp_pos;
@@ -57,8 +58,9 @@ int sys_read(int fd, void *buf, int len) {
 }
 
 int sys_write(int fd, char *buf, int len) {
-	buf[len] = '\0';
-	log_printf("%s", buf);
+	// buf[len] = '\0';
+	console_write(0, buf, len);
+	// log_printf("%s", buf);
 	return len;
 }
 

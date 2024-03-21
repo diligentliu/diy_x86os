@@ -5,6 +5,7 @@
 #include "tools/log.h"
 #include "core/memory.h"
 #include "cpu/mmu.h"
+#include "dev/console.h"
 
 static addr_alloc_t paddr_alloc;        // 物理地址分配结构
 static pde_t kernel_page_dir[PDE_CNT] __attribute__((aligned(MEM_PAGE_SIZE))); // 内核页目录表
@@ -51,7 +52,7 @@ static void addr_free_page(addr_alloc_t *alloc, uint32_t addr, int page_count) {
 }
 
 static void show_mem_info(boot_info_t *boot_info) {
-	log_printf("\r\nmemory region:");
+	log_printf("\nmemory region:");
 	for (int i = 0; i < boot_info->ram_region_count; i++) {
 		log_printf("[%d]: 0x%x - 0x%x", i,
 		           boot_info->ram_region_cfg[i].start,
@@ -142,10 +143,10 @@ void create_kernel_table(void) {
 	// 地址映射表, 用于建立内核级的地址映射
 	// 地址不变，但是添加了属性
 	static memory_map_t kernel_map[] = {
-			{kernel_base,            s_text,                        0,                      PTE_W},                                // 内核栈区
-			{s_text,                 e_text,                        s_text, 0},                                    // 内核代码区
-			{s_data,                 (void *) (MEM_EBDA_START - 1), s_data,                 PTE_W},         // 内核数据区
-
+			{kernel_base,            s_text,                        0,                      PTE_W},     // 内核栈区
+			{s_text,                 e_text,                        s_text, 0},                         // 内核代码区
+			{s_data,                 (void *) (MEM_EBDA_START - 1), s_data,                 PTE_W},     // 内核数据区
+			{(void *) CONSOLE_DISP_ADDR, (void *) CONSOLE_DISP_END, (void *) CONSOLE_DISP_ADDR, PTE_W}, // 显存区
 			// 扩展存储空间一一映射，方便直接操作
 			{(void *) MEM_EXT_START, (void *) MEM_EXT_END,          (void *) MEM_EXT_START, PTE_W},
 	};
