@@ -92,6 +92,8 @@ int task_init(task_t *task, const char *name, int flag, uint32_t entry, uint32_t
 	list_node_init(&task->wait_node);
 	list_node_init(&task->all_node);
 
+	kernel_memset(&task->file_table, 0, sizeof(task->file_table));
+
 	irq_state_t state = irq_enter_protection();
 	task->pid = (uint32_t) task;
 
@@ -127,6 +129,33 @@ void task_uninit(task_t *task) {
 void task_switch_from_to(task_t *from, task_t *to) {
 	switch_to_tss(to->tss_selector);
 	// simple_switch(&from->stack, to->stack);
+}
+
+file_t *task_file(int fd) {
+	task_t *task = task_current();
+	if (fd < 0 || fd >= TASK_OFILE_NR) {
+		return (file_t *) 0;
+	}
+	return task->file_table[fd];
+}
+
+int task_alloc_fd(file_t *file) {
+	task_t *task = task_current();
+	for (int i = 0; i < TASK_OFILE_NR; ++i) {
+		if (task->file_table[i] == (file_t *) 0) {
+			task->file_table[i] = file;
+			return i;
+		}
+	}
+	return -1;
+}
+
+void task_free_fd(int fd) {
+	task_t *task = task_current();
+	if (fd < 0 || fd >= TASK_OFILE_NR) {
+		return;
+	}
+	task->file_table[fd] = (file_t *) 0;
 }
 
 static void idle_task_entry() {

@@ -2,13 +2,13 @@
 #define OS_CONSOLE_H
 
 #include "comm/types.h"
+#include "tty.h"
 
 #define CONSOLE_DISP_ADDR       0xb8000
 #define CONSOLE_DISP_END        (CONSOLE_DISP_ADDR + 32 * 1024)
 #define CONSOLE_ROW_MAX         25
 #define CONSOLE_COL_MAX         80
 
-#define ASCII_ESC               0x1B
 #define ESC_PARAM_MAX           10
 
 typedef enum _color_t {
@@ -54,8 +54,9 @@ typedef struct _console_t {
 	int current_esc_param_index;
 } console_t;
 
-int console_init();
-int console_write(int console, char *data, int size);
+int console_init(int minor);
+int console_write(tty_t *tty);
 void console_close(int console);
+void console_select(int minor);
 
 #endif //OS_CONSOLE_H
