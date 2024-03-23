@@ -15,6 +15,7 @@
 #include "tools/klib.h"
 #include "dev/console.h"
 #include "dev/keyboard.h"
+#include "fs/fs.h"
 
 /**
  * 内核入口
@@ -22,14 +23,13 @@
 void kernel_init(boot_info_t *boot_info) {
 	// 初始化CPU，再重新加载
 	cpu_init();
+	irq_init();
 
 	log_init();
-	console_init();
 	memory_init(boot_info);
-	irq_init();
+	fs_init();
 	time_init();
 	task_manager_init();
-	keyboard_init();
 }
 
 void move_to_first_task(void) {
@@ -53,8 +53,8 @@ void move_to_first_task(void) {
 }
 
 void init_main(void) {
-	log_printf("Kernel is running....");
-	log_printf("Version: %s", OS_VERSION);
+	log_printf("Kernel is running....\n");
+	log_printf("Version: %s\n", OS_VERSION);
 
 	// int a = 3 / 0;
 	// irq_enable_global();

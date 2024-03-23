@@ -52,9 +52,9 @@ static void addr_free_page(addr_alloc_t *alloc, uint32_t addr, int page_count) {
 }
 
 static void show_mem_info(boot_info_t *boot_info) {
-	log_printf("\nmemory region:");
+	log_printf("\nmemory region:\n");
 	for (int i = 0; i < boot_info->ram_region_count; i++) {
-		log_printf("[%d]: 0x%x - 0x%x", i,
+		log_printf("[%d]: 0x%x - 0x%x\n", i,
 		           boot_info->ram_region_cfg[i].start,
 		           boot_info->ram_region_cfg[i].size);
 	}
@@ -199,7 +199,7 @@ void memory_init(boot_info_t *boot_info) {
 	// 1MB内存空间起始，在链接脚本中定义
 	extern uint8_t *mem_free_start;
 
-	log_printf("memory init...");
+	log_printf("memory init...\n");
 	show_mem_info(boot_info);
 
 	// 在内核数据后面放物理页位图
@@ -208,7 +208,7 @@ void memory_init(boot_info_t *boot_info) {
 	// 计算1MB以上空间的空闲内存容量，并对齐的页边界
 	uint32_t mem_up1MB_free = total_mem_size(boot_info) - MEM_EXT_START;
 	mem_up1MB_free = down2(mem_up1MB_free, MEM_PAGE_SIZE);   // 对齐到4KB页
-	log_printf("Free memory: 0x%x, size: 0x%x", MEM_EXT_START, mem_up1MB_free);
+	log_printf("Free memory: 0x%x, size: 0x%x\n", MEM_EXT_START, mem_up1MB_free);
 
 	// 4GB大小需要总共4*1024*1024*1024/4096/8=128KB的位图, 使用低1MB的RAM空间中足够
 	// 该部分的内存仅跟在mem_free_start开始放置
@@ -399,7 +399,7 @@ char *sys_sbrk(int incr) {
 	ASSERT(incr >= 0);
 
 	if (incr == 0) {
-		log_printf("sbrk(0)");
+		// log_printf("sbrk(0)");
 		return pre_heap_end;
 	}
 
@@ -423,12 +423,12 @@ char *sys_sbrk(int incr) {
 		uint32_t cur_size = end - start;
 		int err = memory_alloc_page_for(start, cur_size, PTE_P | PTE_W | PTE_U);
 		if (err < 0) {
-			log_printf("sbrk failed. err = %d", err);
+			// log_printf("sbrk failed. err = %d", err);
 			return (char *) 0;
 		}
 	}
 
-	log_printf("sbrk(%d): end = 0x%x", pre_incr, end);
+	// log_printf("sbrk(%d): end = 0x%x", pre_incr, end);
 	task->heap_end = end;
 	return (char *) pre_heap_end;
 }

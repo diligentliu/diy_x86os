@@ -3,6 +3,7 @@
 #include "comm/cpu_instr.h"
 #include "tools/log.h"
 #include "tools/klib.h"
+#include "dev/tty.h"
 
 static keyboard_state_t keyboard_state;	// 键盘状态
 
@@ -25,7 +26,7 @@ static const key_map_t map_table[256] = {
 		[0x0B] = {'0', ')'},
 		[0x0C] = {'-', '_'},
 		[0x0D] = {'=', '+'},
-		[0x0E] = {'\b', '\b'},
+		[0x0E] = {0x7F, 0x7F},
 		[0x0F] = {'\t', '\t'},
 		[0x10] = {'q', 'Q'},
 		[0x11] = {'w', 'W'},
@@ -71,10 +72,15 @@ static inline char get_key(uint8_t key_code) {
 }
 
 static inline int is_make_code(uint8_t key_code) {
-	return !(key_code & 0x80);
+	return (key_code & 0x80) == 0;
 }
 
 void keyboard_init() {
+	static int init_flag = 0;
+	if (init_flag) {
+		return;
+	}
+	init_flag = 1;
 	kernel_memset(&keyboard_state, 0, sizeof(keyboard_state));
 	irq_install(IRQ1_KEYBOARD, exception_handler_keyboard);
 	irq_enable(IRQ1_KEYBOARD);
@@ -117,6 +123,14 @@ static void update_led_status() {
 	keyboard_read();
 }
 
+static void do_fx_key(char key) {
+	int minor = key - KEY_F1;
+	// if (keyboard_state.left_ctrl_press || keyboard_state.right_ctrl_press) {
+	// 	tty_select(minor);
+	// }
+	tty_select(minor);
+}
+
 static void do_normal_key(uint8_t scancode) {
 	char key = get_key(scancode);
 	int is_make = is_make_code(scancode);
@@ -149,6 +163,8 @@ static void do_normal_key(uint8_t scancode) {
 		case KEY_F6:
 		case KEY_F7:
 		case KEY_F8:
+			do_fx_key(key);
+			break;
 		case KEY_F9:
 		case KEY_F10:
 		case KEY_F11:
@@ -174,7 +190,8 @@ static void do_normal_key(uint8_t scancode) {
 					}
 				}
 
-				log_printf("key : %c", key);
+				// log_printf("key : %c\n", key);
+				tty_in(key);
 			}
 			break;
 	}

@@ -20,7 +20,7 @@
 
 #define KEY_E0			        0xE0	    // E0编码
 #define KEY_E1			        0xE1	    // E1编码
-#define	ASCII_ESC		        0x1b
+#define	ASCII_ESC		        0x1B
 #define	ASCII_DEL		        0x7F
 
 /**
