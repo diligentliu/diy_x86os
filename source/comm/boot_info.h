@@ -1,8 +1,8 @@
 ﻿/**
  * 系统启动信息
  */
-#ifndef BOOT_INFO_H
-#define BOOT_INFO_H
+#ifndef OS_BOOT_INFO_H
+#define OS_BOOT_INFO_H
 
 #include "types.h"
 
@@ -23,4 +23,4 @@ typedef struct _boot_info_t {
 #define SECTOR_SIZE        512            // 磁盘扇区大小
 #define SYS_KERNEL_LOAD_ADDR        (1024*1024)        // 内核加载的起始地址
 
-#endif // BOOT_INFO_H
+#endif // OS_BOOT_INFO_H

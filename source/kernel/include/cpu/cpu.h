@@ -4,8 +4,8 @@
  * 作者：李述铜
  * 联系邮箱: 527676163@qq.com
  */
-#ifndef CPU_H
-#define CPU_H
+#ifndef OS_CPU_H
+#define OS_CPU_H
 
 #include "comm/types.h"
 

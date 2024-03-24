@@ -88,6 +88,7 @@ int task_init(task_t *task, const char *name, int flag, uint32_t entry, uint32_t
 	task->sleep_ticks = 0;
 	task->time_ticks = TASK_TIME_SLICE_DEFAULT;
 	task->slice_ticks = TASK_TIME_SLICE_DEFAULT;
+	task->status = 0;
 	list_node_init(&task->run_node);
 	list_node_init(&task->wait_node);
 	list_node_init(&task->all_node);
@@ -271,6 +272,88 @@ int sys_yield() {
 	return 0;
 }
 
+void sys_exit(int status) {
+	task_t *current = task_current();
+	for (int fd = 0; fd < TASK_OFILE_NR; ++fd) {
+		file_t *file = current->file_table[fd];
+		if (file) {
+			sys_close(fd);
+			current->file_table[fd] = (file_t *) 0;
+		}
+	}
+
+	int move_child = 0;
+
+	// 找所有的子进程，将其转交给 init 进程
+	mutex_lock(&task_table_mutex);
+	for (int i = 0; i < TASK_NR_MAX; i++) {
+		task_t *task = &task_table[i];
+		if (task->parent == current) {
+			// 有子进程，则转给init_task
+			task->parent = &task_manager.first_task;
+
+			// 如果子进程中有僵尸进程，唤醒回收资源
+			// 并不由自己回收，因为自己将要退出
+			if (task->state == TASK_ZOMBIE) {
+				move_child = 1;
+			}
+		}
+	}
+	mutex_unlock(&task_table_mutex);
+
+	irq_state_t state = irq_enter_protection();
+
+	task_t *parent = current->parent;
+	// 如果父进程为init进程，在下方唤醒
+	if (move_child && parent != &task_manager.first_task) {
+		if (task_manager.first_task.state == TASK_WAITTING) {
+			task_set_ready(&task_manager.first_task);
+		}
+	}
+
+	if (parent->state == TASK_WAITTING) {
+		task_set_ready(parent);
+	}
+
+	current->status = status;
+	current->state = TASK_ZOMBIE;
+	task_set_block(current);
+	task_dispatch();
+	irq_leave_protection(state);
+}
+
+int sys_wait(int *status) {
+	task_t *current = task_current();
+	while (1) {
+		mutex_lock(&task_table_mutex);
+
+		for (int i = 0; i < TASK_NR_MAX; ++i) {
+			task_t *task = &task_table[i];
+			if (task->parent != current) {
+				continue;
+			}
+			if (task->state == TASK_ZOMBIE) {
+				int pid = task->pid;
+				*status = task->status;
+				memory_destroy_uvm(task->tss.cr3);
+				memory_free_page(task->tss.esp0 - MEM_PAGE_SIZE);
+				kernel_memset(task, 0, sizeof(task_t));
+
+				mutex_unlock(&task_table_mutex);
+				return pid;
+			}
+		}
+
+		mutex_unlock(&task_table_mutex);
+
+		irq_state_t state = irq_enter_protection();
+		task_set_block(current);
+		current->state = TASK_WAITTING;
+		task_dispatch();
+		irq_leave_protection(state);
+	}
+}
+
 void task_dispatch() {
 	irq_state_t state = irq_enter_protection();
 
@@ -333,6 +416,17 @@ int sys_getpid() {
 	return task_current()->pid;
 }
 
+static void copy_opened_files(task_t *child) {
+	task_t *parent = task_current();
+	for (int i = 0; i < TASK_OFILE_NR; i++) {
+		file_t *file = parent->file_table[i];
+		if (file) {
+			file_inc_ref(file);
+			child->file_table[i] = file;
+		}
+	}
+}
+
 int sys_fork() {
 	task_t *parent = task_current();
 	task_t *child = alloc_task();
@@ -351,6 +445,8 @@ int sys_fork() {
 	if (err < 0) {
 		goto fork_failed;
 	}
+
+	copy_opened_files(child);
 
 	tss_t *tss = &child->tss;
 	tss->eax = 0;
