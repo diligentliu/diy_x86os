@@ -1,8 +1,8 @@
 /**
  * MMU与分布处理
  */
-#ifndef MMU_H
-#define MMU_H
+#ifndef OS_MMU_H
+#define OS_MMU_H
 
 #include "comm/types.h"
 #include "comm/cpu_instr.h"
@@ -104,4 +104,4 @@ static inline void mmu_set_page_dir(uint32_t paddr) {
 	write_cr3(paddr);
 }
 
-#endif // MMU_H
+#endif // OS_MMU_H

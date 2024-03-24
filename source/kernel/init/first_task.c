@@ -42,7 +42,7 @@ int first_task_main() {
 
 	while (1) {
 		// print_msg("first_task_main, %d\n", ++count);
-		msleep(10000);
+		int status;
+		wait(&status);
 	}
-	return 0;
 }

@@ -1,5 +1,5 @@
-#ifndef KLIB_H
-#define KLIB_H
+#ifndef OS_KLIB_H
+#define OS_KLIB_H
 
 #include <stdarg.h>
 #include "comm/types.h"

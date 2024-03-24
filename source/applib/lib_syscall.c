@@ -33,6 +33,21 @@ void yield() {
 	sys_call(&args);
 }
 
+void _exit(int status) {
+	syscall_args_t args;
+	args.id = SYS_exit;
+	args.arg0 = status;
+	sys_call(&args);
+	while (1);
+}
+
+int wait(int *status) {
+	syscall_args_t args;
+	args.id = SYS_wait;
+	args.arg0 = (int) status;
+	return sys_call(&args);
+}
+
 int open(const char *name, int flags, ...) {
 	// 不考虑支持太多参数
 	syscall_args_t args;
