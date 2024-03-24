@@ -36,7 +36,8 @@ int main(int argc, char *argv[]) {
 	puts("create data: 2024-3-23");
 
 	fprintf(stderr, "stderr output\n");
-	puts("sh >>");
+	printf("sh >>");
+	fflush(stdout);
 
 	while (1) {
 		// printf("shell pid = %d\n", getpid());

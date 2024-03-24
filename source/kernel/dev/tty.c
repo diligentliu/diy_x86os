@@ -65,7 +65,7 @@ int tty_open(device_t *dev) {
 	tty_fifo_init(&tty->ofifo, tty->obuf, TTY_OBUF_SIZE);
 	sem_init(&tty->osem, TTY_OBUF_SIZE);
 	tty->oflags = TTY_OCRLF;
-	tty->console = 0;
+	tty->console = minor;
 	keyboard_init();
 	console_init(minor);
 	return 0;
