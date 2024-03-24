@@ -1,8 +1,8 @@
 /**
  * 中断处理
  */
-#ifndef IRQ_H
-#define IRQ_H
+#ifndef OS_IRQ_H
+#define OS_IRQ_H
 
 #include "comm/types.h"
 

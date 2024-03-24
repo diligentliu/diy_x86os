@@ -1,10 +1,10 @@
 /**
  * 日志输出
  */
-#ifndef LOG_H
-#define LOG_H
+#ifndef OS_LOG_H
+#define OS_LOG_H
 
 void log_init();
 void log_printf(const char *fmt, ...);
 
-#endif // LOG_H
+#endif // OS_LOG_H

@@ -1,7 +1,7 @@
 /**
  * 内核初始化以及测试代码
  */
-#ifndef __INIT_H__
-#define __INIT_H__
+#ifndef OS_INIT_H__
+#define OS_INIT_H__
 
 #endif // INIT_H

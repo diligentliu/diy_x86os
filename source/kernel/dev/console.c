@@ -141,7 +141,7 @@ int console_init(int minor) {
 	console->foreground = COLOR_WHITE;
 	console->background = COLOR_BLACK;
 	// console_clear(console);
-
+	mutex_init(&console->mutex);
 	return 0;
 }
 
@@ -302,8 +302,10 @@ static void write_esc(console_t *con, char c) {
 }
 
 int console_write(tty_t *tty) {
-	console_t *con = &console_buf[tty->console];
+	console_t *console = &console_buf[tty->console];
 	int len = 0;
+
+	mutex_lock(&console->mutex);
 	do {
 		char c;
 		int err = tty_fifo_get(&tty->ofifo, &c);
@@ -312,15 +314,15 @@ int console_write(tty_t *tty) {
 		}
 		sem_v(&tty->osem);
 
-		switch (con->write_status) {
+		switch (console->write_status) {
 			case CONSOLE_WRITE_NORMAL:
-				write_normal(con, c);
+				write_normal(console, c);
 				break;
 			case CONSOLE_WRITE_ESC:
-				write_esc(con, c);
+				write_esc(console, c);
 				break;
 			case CONSOLE_WRITE_SQUARE:
-				write_esc_square(con, c);
+				write_esc_square(console, c);
 				break;
 			default:
 				break;
@@ -328,8 +330,9 @@ int console_write(tty_t *tty) {
 		++len;
 	} while (1);
 
+	mutex_unlock(&console->mutex);
 	if (tty->console == current_console) {
-		update_cursor_pos(con);
+		update_cursor_pos(console);
 	}
 	return len;
 }

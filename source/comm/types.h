@@ -1,8 +1,8 @@
 /**
  * 系统内部的基本数据类型
  */
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef OS_TYPES_H
+#define OS_TYPES_H
 
 // 基本整数类型，下面的写法和视频中的不同，加了一些宏处理
 // 主要是因为将要使用newlib库，newlib有同样使用typedef定义uint8_t类型

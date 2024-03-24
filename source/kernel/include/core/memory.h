@@ -1,8 +1,8 @@
 /**
  * 内存管理
  */
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef OS_MEMORY_H
+#define OS_MEMORY_H
 
 #include "tools/bitmap.h"
 #include "comm/boot_info.h"
@@ -53,4 +53,4 @@ int memory_copy_uvm_data(uint32_t to, uint32_t page_dir, uint32_t from, uint32_t
 
 char *sys_sbrk(int incr);
 
-#endif // MEMORY_H
+#endif // OS_MEMORY_H

@@ -1,8 +1,8 @@
 /**
  * 硬件定时器配置
  */
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef OS_TIMER_H
+#define OS_TIMER_H
 
 #include "comm/types.h"
 #include "cpu/irq.h"
