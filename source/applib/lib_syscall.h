@@ -56,4 +56,7 @@ int fstat(int file, struct stat *st);
 void *sbrk(ptrdiff_t incr);
 int dup(int fd);
 
+void _exit(int status);
+int wait(int *status);
+
 #endif //OS_LIB_SYSCALL_H

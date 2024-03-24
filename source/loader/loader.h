@@ -4,8 +4,8 @@
  * 二级加载部分，用于实现更为复杂的初始化、内核加载的工作。
  *
  */
-#ifndef LOADER_H
-#define LOADER_H
+#ifndef OS_LOADER_H
+#define OS_LOADER_H
 
 #include "comm/types.h"
 #include "comm/boot_info.h"
@@ -25,4 +25,4 @@ typedef struct SMAP_entry {
 
 extern boot_info_t boot_info;
 
-#endif // LOADER_H
+#endif // OS_LOADER_H

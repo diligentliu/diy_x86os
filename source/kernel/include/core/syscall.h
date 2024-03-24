@@ -8,6 +8,8 @@
 #define SYS_fork                2
 #define SYS_execve              3
 #define SYS_yield               4
+#define SYS_exit                5
+#define SYS_wait                6
 
 #define SYS_open                50
 #define SYS_read                51

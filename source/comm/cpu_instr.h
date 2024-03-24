@@ -1,8 +1,8 @@
 /**
  * 汇编指令的封装
  */
-#ifndef CPU_INSTR_H
-#define CPU_INSTR_H
+#ifndef OS_CPU_INSTR_H
+#define OS_CPU_INSTR_H
 
 #include "types.h"
 
