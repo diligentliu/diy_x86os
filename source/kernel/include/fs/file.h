@@ -11,14 +11,17 @@ typedef enum _file_type_t {
 	FILE_TYPE_TTY = 1,
 } file_type_t;
 
+struct _fs_t;
 typedef struct _file_t {
 	char name[FILE_NAME_SIZE];
 	file_type_t type;
 	uint32_t size;
 	int ref;                    // 引用计数
 	int dev_id;                 // 文件所属设备 id
-	int pos;					// 当前位置
-	int mode;					// 读写模式
+	int pos;                    // 当前位置
+	int mode;                    // 读写模式
+
+	struct _fs_t *fs;
 } file_t;
 
 file_t *file_alloc();

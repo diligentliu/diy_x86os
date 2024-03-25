@@ -5,7 +5,7 @@
 #include "tools/klib.h"
 #include "dev/tty.h"
 
-static keyboard_state_t keyboard_state;	// 键盘状态
+static keyboard_state_t keyboard_state;    // 键盘状态
 
 /**
  * 键盘映射表，分3类
@@ -21,7 +21,7 @@ static const key_map_t map_table[256] = {
 		[0x6] = {'5', '%'},
 		[0x7] = {'6', '^'},
 		[0x08] = {'7', '&'},
-		[0x09] = {'8', '*' },
+		[0x09] = {'8', '*'},
 		[0x0A] = {'9', '('},
 		[0x0B] = {'0', ')'},
 		[0x0C] = {'-', '_'},
@@ -43,7 +43,7 @@ static const key_map_t map_table[256] = {
 		[0x1C] = {'\n', '\n'},
 		[0x1E] = {'a', 'A'},
 		[0x1F] = {'s', 'B'},
-		[0x20] = {'d',  'D'},
+		[0x20] = {'d', 'D'},
 		[0x21] = {'f', 'F'},
 		[0x22] = {'g', 'G'},
 		[0x23] = {'h', 'H'},
@@ -154,7 +154,7 @@ static void do_normal_key(uint8_t scancode) {
 		case KEY_CTRL:
 			keyboard_state.left_ctrl_press = is_make;
 			break;
-		// 功能键：写入键盘缓冲区，由应用自行决定如何处理
+			// 功能键：写入键盘缓冲区，由应用自行决定如何处理
 		case KEY_F1:
 		case KEY_F2:
 		case KEY_F3:
@@ -197,14 +197,14 @@ static void do_normal_key(uint8_t scancode) {
 	}
 }
 
-static void do_e0_key (uint8_t raw_code) {
-	int key = get_key(raw_code);			// 去掉最高位
-	int is_make = is_make_code(raw_code);	// 按下或释放
+static void do_e0_key(uint8_t raw_code) {
+	int key = get_key(raw_code);            // 去掉最高位
+	int is_make = is_make_code(raw_code);    // 按下或释放
 
 	// E0开头，主要是HOME、END、光标移动等功能键
 	// 设置一下光标位置，然后直接写入
 	switch (key) {
-		case KEY_CTRL:		// 右ctrl和左ctrl都是这个值
+		case KEY_CTRL:        // 右ctrl和左ctrl都是这个值
 			keyboard_state.right_ctrl_press = is_make;  // 仅设置标志位
 			break;
 		case KEY_ALT:
@@ -215,20 +215,20 @@ static void do_e0_key (uint8_t raw_code) {
 
 void do_handler_keyboard(exception_frame_t *frame) {
 	static enum {
-    	NORMAL,				// 普通，无e0或e1
-		BEGIN_E0,			// 收到e0字符
-		BEGIN_E1,			// 收到e1字符
-    } recv_state = NORMAL;
+		NORMAL,                // 普通，无e0或e1
+		BEGIN_E0,            // 收到e0字符
+		BEGIN_E1,            // 收到e1字符
+	} recv_state = NORMAL;
 
 	// 检查是否有数据，无数据则退出
 	uint8_t status = inb(KEYBOARD_STATUS_PORT);
 	if (!(status & KEYBOARD_STATUS_RECV_READY)) {
-        pic_send_eoi(IRQ1_KEYBOARD);
+		pic_send_eoi(IRQ1_KEYBOARD);
 		return;
 	}
 
-    uint8_t raw_code = inb(KEYBOARD_DATA_PORT);
-    pic_send_eoi(IRQ1_KEYBOARD);
+	uint8_t raw_code = inb(KEYBOARD_DATA_PORT);
+	pic_send_eoi(IRQ1_KEYBOARD);
 	if (raw_code == KEY_E0) {
 		// E0字符
 		recv_state = BEGIN_E0;
@@ -237,16 +237,16 @@ void do_handler_keyboard(exception_frame_t *frame) {
 		recv_state = BEGIN_E1;
 	} else {
 		switch (recv_state) {
-		case NORMAL:
-			do_normal_key(raw_code);
-			break;
-		case BEGIN_E0:
-			do_e0_key(raw_code);
-			recv_state = NORMAL;
-			break;
-		case BEGIN_E1:
-			recv_state = NORMAL;
-			break;
+			case NORMAL:
+				do_normal_key(raw_code);
+				break;
+			case BEGIN_E0:
+				do_e0_key(raw_code);
+				recv_state = NORMAL;
+				break;
+			case BEGIN_E1:
+				recv_state = NORMAL;
+				break;
 		}
 	}
 }

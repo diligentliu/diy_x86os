@@ -143,12 +143,12 @@ void create_kernel_table(void) {
 	// 地址映射表, 用于建立内核级的地址映射
 	// 地址不变，但是添加了属性
 	static memory_map_t kernel_map[] = {
-			{kernel_base,            s_text,                        0,                      PTE_W},     // 内核栈区
-			{s_text,                 e_text,                        s_text, 0},                         // 内核代码区
-			{s_data,                 (void *) (MEM_EBDA_START - 1), s_data,                 PTE_W},     // 内核数据区
-			{(void *) CONSOLE_DISP_ADDR, (void *) CONSOLE_DISP_END, (void *) CONSOLE_DISP_ADDR, PTE_W}, // 显存区
+			{kernel_base,                s_text,                        0,                          PTE_W},     // 内核栈区
+			{s_text,                     e_text,                        s_text, 0},                         // 内核代码区
+			{s_data,                     (void *) (MEM_EBDA_START - 1), s_data,                     PTE_W},     // 内核数据区
+			{(void *) CONSOLE_DISP_ADDR, (void *) CONSOLE_DISP_END,     (void *) CONSOLE_DISP_ADDR, PTE_W}, // 显存区
 			// 扩展存储空间一一映射，方便直接操作
-			{(void *) MEM_EXT_START, (void *) MEM_EXT_END,          (void *) MEM_EXT_START, PTE_W},
+			{(void *) MEM_EXT_START,     (void *) MEM_EXT_END,          (void *) MEM_EXT_START,     PTE_W},
 	};
 
 	// 清空页目录表

@@ -24,9 +24,9 @@ static void update_cursor_pos(console_t *console) {
 	pos += console->cursor_row * console->display_cols + console->cursor_col;
 
 	irq_state_t state = irq_enter_protection();
-	outb(0x3D4, 0x0F);		// 写低地址
+	outb(0x3D4, 0x0F);        // 写低地址
 	outb(0x3D5, (uint8_t) (pos & 0xFF));
-	outb(0x3D4, 0x0E);		// 写高地址
+	outb(0x3D4, 0x0E);        // 写高地址
 	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 	irq_leave_protection(state);
 }
@@ -137,7 +137,7 @@ int console_init(int minor) {
 	console->old_cursor_col = console->cursor_col;
 	console->write_status = CONSOLE_WRITE_NORMAL;
 	console->disp_base = (disp_char_t *) CONSOLE_DISP_ADDR +
-						 minor * CONSOLE_COL_MAX * CONSOLE_ROW_MAX;
+	                     minor * CONSOLE_COL_MAX * CONSOLE_ROW_MAX;
 	console->foreground = COLOR_WHITE;
 	console->background = COLOR_BLACK;
 	// console_clear(console);
@@ -349,9 +349,9 @@ void console_select(int minor) {
 
 	uint16_t pos = minor * console->display_cols * console->display_rows;
 
-	outb(0x3D4, 0xC);		// 写高地址
+	outb(0x3D4, 0xC);        // 写高地址
 	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
-	outb(0x3D4, 0xD);		// 写低地址
+	outb(0x3D4, 0xD);        // 写低地址
 	outb(0x3D5, (uint8_t) (pos & 0xFF));
 
 	// 更新光标到当前屏幕

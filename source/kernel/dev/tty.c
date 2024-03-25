@@ -172,11 +172,11 @@ void tty_select(int minor) {
 }
 
 dev_desc_t dev_tty_desc = {
-	.name = "tty",
-	.major = DEV_TTY,
-	.open = tty_open,
-	.read = tty_read,
-	.write = tty_write,
-	.control = tty_control,
-	.close = tty_close,
+		.name = "tty",
+		.major = DEV_TYPE_TTY,
+		.open = tty_open,
+		.read = tty_read,
+		.write = tty_write,
+		.control = tty_control,
+		.close = tty_close,
 };

@@ -7,14 +7,14 @@
 extern dev_desc_t dev_tty_desc;
 
 static dev_desc_t *dev_desc_table[] = {
-	&dev_tty_desc,
+		&dev_tty_desc,
 };
 
 static device_t dev_table[DEV_MAX_COUNT];
 
 static int is_devid_bad(int dev_id) {
 	return dev_id < 0 || dev_id >= DEV_MAX_COUNT
-	|| dev_table[dev_id].desc == (dev_desc_t *) 0;
+	       || dev_table[dev_id].desc == (dev_desc_t *) 0;
 }
 
 int dev_open(int major, int minor, void *data) {
@@ -33,7 +33,7 @@ int dev_open(int major, int minor, void *data) {
 	}
 
 	// 新打开设备？查找设备类型描述符, 看看是不是支持的类型
-	dev_desc_t * desc = (dev_desc_t *) 0;
+	dev_desc_t *desc = (dev_desc_t *) 0;
 	for (int i = 0; i < sizeof(dev_desc_table) / sizeof(dev_desc_table[0]); i++) {
 		dev_desc_t *d = dev_desc_table[i];
 		if (d->major == major) {
