@@ -34,8 +34,8 @@ typedef enum _color_t {
 typedef union _disp_char_t {
 	struct {
 		char c;
-		char foreground : 4;
-		char background : 3;
+		char foreground: 4;
+		char background: 3;
 	};
 	uint16_t data;
 } disp_char_t;

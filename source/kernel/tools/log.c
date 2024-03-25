@@ -24,7 +24,7 @@ static int log_dev_id;
 void log_init(void) {
 	mutex_init(&log_mutex);
 
-	log_dev_id = dev_open(DEV_TTY, 0, (void *) 0);
+	log_dev_id = dev_open(DEV_TYPE_TTY, 0, (void *) 0);
 #if LOG_USE_COM
 	outb(COM1_PORT + 1, 0x00); // Disable all interrupts
 	outb(COM1_PORT + 3, 0x80); // Enable DLAB (set baud rate divisor)
