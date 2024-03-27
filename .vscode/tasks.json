@@ -4,11 +4,25 @@
     "version": "2.0.0", 
     "tasks": [
         {
-            "label": "写映像文件",
+            "label": "cmake build",
+            "type": "shell",
+            "command": "cmake --build ${workspaceRoot}/build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            }
+        },
+        {
+            "label": "write image file",
             "type": "shell",
             "command": "bash ${workspaceRoot}/script/img-write-osx.sh",
             "windows": {
-                // windows下特殊一些
                 "command": "${workspaceRoot}/script/img-write-win.bat",
             },
             "linux":{
@@ -19,11 +33,10 @@
             }
         },
         {
-            "label": "启动qemu",
+            "label": "start qemu",
             "type": "shell",
             "command": "bash ${workspaceRoot}/script/qemu-debug-osx.sh",
             "windows": {
-                // windows下特殊一些
                 "command": "${workspaceRoot}/script/qemu-debug-win.bat",
             },
             "linux":{
@@ -34,11 +47,12 @@
             }
         },
         {
-            "label": "调试准备",
+            "label": "gdb prepare",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "写映像文件",
-                "启动qemu"
+                "cmake build",
+                "write image file",
+                "start qemu"
             ],
         }
     ]
