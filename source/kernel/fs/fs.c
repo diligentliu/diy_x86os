@@ -8,6 +8,8 @@
 #include "dev/dev.h"
 #include "core/task.h"
 #include "fs/devfs/devfs.h"
+#include "dev/disk.h"
+#include "os_cfg.h"
 #include <sys/file.h>
 
 #define FS_TABLE_SIZE 16
@@ -16,6 +18,8 @@ static list_t free_list;
 static fs_t fs_table[FS_TABLE_SIZE];
 
 extern fs_op_t devfs_op;
+extern fs_op_t fatfs_op;
+static fs_t *root_fs;
 
 static uint8_t TEMP_ADDR[100 * 1024];
 static uint8_t *temp_pos;
@@ -25,6 +29,8 @@ static fs_op_t *get_fs_op(fs_type_t type, int major) {
 	switch (type) {
 		case FS_TYPE_DEV:
 			return &devfs_op;
+		case FS_TYPE_FAT16:
+			return &fatfs_op;
 		default:
 			return (fs_op_t *) 0;
 	}
@@ -32,7 +38,7 @@ static fs_op_t *get_fs_op(fs_type_t type, int major) {
 
 static fs_t *mount(fs_type_t type, const char *mount_point, int major, int minor) {
 	fs_t *fs = (fs_t *) 0;
-	log_printf("mount file system: %s, dev: %x", mount_point, major);
+	log_printf("mount file system: %s, dev: %x\n", mount_point, major);
 
 	list_node_t *node = list_first(&mounted_list);
 	while (node) {
@@ -88,10 +94,16 @@ void fs_init() {
 	mount_list_init();
 	file_table_init();
 
+	disk_init();
+
 	fs_t *fs = mount(FS_TYPE_DEV, "/dev", 0, 0);
 	ASSERT(fs != (fs_t *) 0);
+
+	root_fs = mount(FS_TYPE_FAT16, "/home", ROOT_DEV);
+	ASSERT(root_fs != (fs_t *) 0);
 }
 
+#if 0
 static void read_disk(uint32_t sector, uint32_t sector_count, uint8_t *buf) {
 	outb(0x1F6, (uint8_t) (0xE0));
 
@@ -119,6 +131,7 @@ static void read_disk(uint32_t sector, uint32_t sector_count, uint8_t *buf) {
 		}
 	}
 }
+#endif
 
 static int is_fd_bad(int fd) {
 	return fd < 0 || fd >= TASK_OFILE_NR;
@@ -175,8 +188,11 @@ static void fs_unprotect(fs_t *fs) {
 
 int sys_open(const char *path, int flags, ...) {
 	if (kernel_strncmp(path, "/shell.elf", 10) == 0) {
-		read_disk(5000, 80, TEMP_ADDR);
-		temp_pos = TEMP_ADDR;
+		// read_disk(5000, 80, TEMP_ADDR);
+		// temp_pos = TEMP_ADDR;
+		int dev_id = dev_open(DEV_TYPE_DISK, 0xA0, (void *) 0);
+		dev_read(dev_id, 5000, TEMP_ADDR, 80);
+		temp_pos = (uint8_t *) TEMP_ADDR;
 		return TEMP_FILE_ID;
 	}
 
@@ -207,7 +223,7 @@ int sys_open(const char *path, int flags, ...) {
 		path = path_next_child(path);
 	} else {
 		// 如果没有挂载点，则认为是根目录
-		// fs = root_fs;
+		fs = root_fs;
 	}
 
 	file->mode = flags;
@@ -396,4 +412,25 @@ int sys_dup(int fd) {
 
 	log_printf("no task file avaliable\n");
 	return -1;
+}
+
+int sys_opendir(const char *path, DIR *dir) {
+	fs_protect(root_fs);
+	int err = root_fs->op->opendir(root_fs, path, dir);
+	fs_unprotect(root_fs);
+	return err;
+}
+
+int sys_readdir(DIR *dir, struct dirent *dirent) {
+	fs_protect(root_fs);
+	int err = root_fs->op->readdir(root_fs, dir, dirent);
+	fs_unprotect(root_fs);
+	return err;
+}
+
+int sys_closedir(DIR *dir) {
+	fs_protect(root_fs);
+	int err = root_fs->op->closedir(root_fs, dir);
+	fs_unprotect(root_fs);
+	return err;
 }

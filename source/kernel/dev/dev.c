@@ -5,9 +5,11 @@
 #define DEV_MAX_COUNT 128
 
 extern dev_desc_t dev_tty_desc;
+extern dev_desc_t dev_disk_desc;
 
 static dev_desc_t *dev_desc_table[] = {
 		&dev_tty_desc,
+		&dev_disk_desc,
 };
 
 static device_t dev_table[DEV_MAX_COUNT];

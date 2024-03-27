@@ -537,33 +537,33 @@ static uint32_t load_elf_file(task_t *task, const char *name, uint32_t page_dir)
 	// 以只读方式打开
 	int file = sys_open(name, 0);
 	if (file < 0) {
-		log_printf("open file failed.%s", name);
+		log_printf("load_elf_file: open file failed.%s", name);
 		goto load_failed;
 	}
 
 	// 先读取文件头
 	int cnt = sys_read(file, (char *) &elf_hdr, sizeof(Elf32_Ehdr));
 	if (cnt < sizeof(Elf32_Ehdr)) {
-		log_printf("elf hdr too small. size=%d", cnt);
+		log_printf("load_elf_file: elf hdr too small. size=%d", cnt);
 		goto load_failed;
 	}
 
 	// 做点必要性的检查。当然可以再做其它检查
 	if ((elf_hdr.e_ident[0] != ELF_MAGIC) || (elf_hdr.e_ident[1] != 'E')
 	    || (elf_hdr.e_ident[2] != 'L') || (elf_hdr.e_ident[3] != 'F')) {
-		log_printf("check elf indent failed.");
+		log_printf("load_elf_file: check elf indent failed.");
 		goto load_failed;
 	}
 
 	// 必须是可执行文件和针对386处理器的类型，且有入口
 	if ((elf_hdr.e_type != ET_EXEC) || (elf_hdr.e_machine != ET_386) || (elf_hdr.e_entry == 0)) {
-		log_printf("check elf type or entry failed.");
+		log_printf("load_elf_file: check elf type or entry failed.");
 		goto load_failed;
 	}
 
 	// 必须有程序头部
 	if ((elf_hdr.e_phentsize == 0) || (elf_hdr.e_phoff == 0)) {
-		log_printf("none programe header");
+		log_printf("load_elf_file: none programe header");
 		goto load_failed;
 	}
 
@@ -571,14 +571,14 @@ static uint32_t load_elf_file(task_t *task, const char *name, uint32_t page_dir)
 	uint32_t e_phoff = elf_hdr.e_phoff;
 	for (int i = 0; i < elf_hdr.e_phnum; i++, e_phoff += elf_hdr.e_phentsize) {
 		if (sys_lseek(file, e_phoff, 0) < 0) {
-			log_printf("read file failed");
+			log_printf("load_elf_file: read file failed");
 			goto load_failed;
 		}
 
 		// 读取程序头后解析，这里不用读取到新进程的页表中，因为只是临时使用下
 		cnt = sys_read(file, (char *) &elf_phdr, sizeof(Elf32_Phdr));
 		if (cnt < sizeof(Elf32_Phdr)) {
-			log_printf("read file failed");
+			log_printf("load_elf_file: read file failed");
 			goto load_failed;
 		}
 
@@ -591,7 +591,7 @@ static uint32_t load_elf_file(task_t *task, const char *name, uint32_t page_dir)
 		// 加载当前程序头
 		int err = load_phdr(file, &elf_phdr, page_dir);
 		if (err < 0) {
-			log_printf("load program hdr failed");
+			log_printf("load_elf_file: load program hdr failed");
 			goto load_failed;
 		}
 

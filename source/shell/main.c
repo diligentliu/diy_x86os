@@ -1,5 +1,6 @@
 #include "lib_syscall.h"
 #include "main.h"
+#include "fs/file.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +18,7 @@ static void cli_init(const char *promot, const cli_cmd_t *cmd_list, int size) {
 }
 
 static void show_promot() {
+	fflush(stdout);
 	printf("%s", cli.promot);
 	fflush(stdout);
 }
@@ -88,6 +90,29 @@ static int do_clear(int argc, char *argv[]) {
 	return 0;
 }
 
+static int do_ls(int argc, char *argv[]) {
+	if (argc > 1) {
+		printf(ESC_COLOR_ERROR"ls: excess parameters"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+	DIR *dir = opendir(".");
+	if (dir == (DIR *) 0) {
+		fprintf(stderr, ESC_COLOR_ERROR"ls: opendir failed\n"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+
+	struct dirent *entry;
+	while ((entry = readdir(dir)) != (struct dirent *) 0) {
+		strlwr(entry->name);
+		printf("%c  %s  %d\n",
+			   entry->type == FILE_TYPE_DIR ? 'd' : 'f',
+			   entry->name,
+			   entry->size
+	    );
+	}
+	return 0;
+}
+
 static int do_exit(int argc, char *argv[]) {
 	if (argc > 1) {
 		printf(ESC_COLOR_ERROR"exit: excess parameters"ESC_COLOR_DEFAULT);
@@ -113,10 +138,15 @@ static const cli_cmd_t cmd_list[] = {
 			.do_func = do_echo
 		},
 		{
+				.name = "ls",
+				.usage = "ls -- list files",
+				.do_func = do_ls
+		},
+		{
 			.name = "exit",
 			.usage = "exit -- exit shell",
 			.do_func = do_exit
-		}
+		},
 };
 
 static const cli_cmd_t *find_builtin(const char *name) {
