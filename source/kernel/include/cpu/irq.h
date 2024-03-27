@@ -27,8 +27,9 @@
 #define IRQ19_XM            19
 #define IRQ20_VE            20
 
-#define IRQ0_TIMER          0x20
-#define IRQ1_KEYBOARD       0x21
+#define IRQ0_TIMER                  0x20
+#define IRQ1_KEYBOARD               0x21
+#define IRQ14_HARDDISK_PRIMARY		0x2E		// 主总线上的ATA磁盘中断
 
 #define ERR_PAGE_P          (1 << 0)        // 存在
 #define ERR_PAGE_WR         (1 << 1)        // 可写

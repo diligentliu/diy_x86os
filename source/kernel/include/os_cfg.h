@@ -18,4 +18,6 @@
 
 #define TASK_NR_MAX                 128               // 最大任务数量
 
+#define ROOT_DEV                    DEV_TYPE_DISK, 0xb1	  // 根文件系统设备号
+
 #endif //OS_OS_CFG_H

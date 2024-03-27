@@ -59,4 +59,20 @@ int dup(int fd);
 void _exit(int status);
 int wait(int *status);
 
+struct dirent {
+	int index;
+	int type;
+	char name[255];
+	int size;
+};
+
+typedef struct _DIR {
+	int index;
+	struct dirent dirent;
+} DIR;
+
+DIR *opendir(const char *path);
+struct dirent *readdir(DIR *dir);
+int closedir(DIR *dir);
+
 #endif //OS_LIB_SYSCALL_H
