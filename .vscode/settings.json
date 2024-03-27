@@ -20,6 +20,8 @@
         "syscall.h": "c",
         "boot_info.h": "c",
         "cpu_instr.h": "c",
-        "fs.h": "c"
+        "fs.h": "c",
+        "dev.h": "c",
+        "fatfs.h": "c"
     },
 }

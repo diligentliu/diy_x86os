@@ -5,6 +5,8 @@
 #include "file.h"
 #include "tools/list.h"
 #include "ipc/mutex.h"
+#include "fs/fatfs/fatfs.h"
+#include "applib/lib_syscall.h"
 
 struct _fs_t;
 
@@ -17,12 +19,17 @@ typedef struct _fs_op_t {
 	void (*close)(file_t *file);
 	int (*seek)(file_t *file, int offset, int whence);
 	int (*stat)(file_t *file, struct stat *st);
+
+	int (*opendir)(struct _fs_t *fs, const char *path, DIR *dir);
+	int (*readdir)(struct _fs_t *fs, DIR *dir, struct dirent *dirent);
+	int (*closedir)(struct _fs_t *fs, DIR *dir);
 } fs_op_t;
 
 #define FS_MOUNT_POINT_LEN      512
 
 typedef enum _fs_type_t {
 	FS_TYPE_DEV = 0,
+	FS_TYPE_FAT16 = 1,
 } fs_type_t;
 
 typedef struct _fs_t {
@@ -33,6 +40,10 @@ typedef struct _fs_t {
 	int dev_id;
 	list_node_t node;
 	mutex_t *mutex;
+
+	union {
+		fat_t fat_data;
+	};
 } fs_t;
 
 void fs_init();
@@ -51,5 +62,9 @@ int sys_isatty(int fd);
 int sys_fstat(int fd, struct stat *st);
 
 int sys_dup(int fd);
+
+int sys_opendir(const char *path, DIR *dir);
+int sys_readdir(DIR *dir, struct dirent *dirent);
+int sys_closedir(DIR *dir);
 
 #endif //OS_FS_H
