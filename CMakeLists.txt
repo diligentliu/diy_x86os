@@ -51,13 +51,13 @@ add_subdirectory(./source/loader)
 add_subdirectory(./source/kernel)
 add_subdirectory(./source/applib)
 add_subdirectory(./source/shell)
-# add_subdirectory(./source/init)
-# add_subdirectory(./source/loop)
+ add_subdirectory(./source/init)
+add_subdirectory(./source/loop)
 
 # 添加编译依赖，先生成app库，再生成kernel和shell
 # 不加则cmake则可能先编译shell和kernel，而缺少libapp，导致编译错误
-#add_dependencies(init app)
+add_dependencies(init app)
 add_dependencies(shell app)
 add_dependencies(kernel app)
-#add_dependencies(loop app)
-#add_dependencies(kernel init)
+add_dependencies(loop app)
+add_dependencies(kernel init)

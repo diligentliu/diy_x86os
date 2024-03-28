@@ -21,8 +21,10 @@ typedef struct _file_t {
 	int ref;                    // 引用计数
 	int dev_id;                 // 文件所属设备 id
 	int pos;                    // 当前位置
-	int mode;                    // 读写模式
-
+	int mode;                   // 读写模式
+	int sblk;                   // 起始块
+	int cblk;                   // 当前块
+	int index;                  // 在父目录表项的文件索引
 	struct _fs_t *fs;
 } file_t;
 

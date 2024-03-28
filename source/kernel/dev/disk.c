@@ -240,7 +240,7 @@ int disk_write(device_t *dev, int addr, const char *buf, int size) {
 	}
 
 	mutex_unlock(disk->mutex);
-	return 0;
+	return sector_cnt;
 }
 
 int disk_control(device_t *dev, int cmd, int arg0, int arg1) {

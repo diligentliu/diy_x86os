@@ -148,6 +148,22 @@ int tty_write(device_t *dev, int addr, const char *buf, int size) {
 }
 
 int tty_control(device_t *dev, int cmd, int arg0, int arg1) {
+	tty_t *tty = get_tty(dev);
+	if (!tty) {
+		return -1;
+	}
+
+	switch (cmd) {
+		case TTY_CMD_ECHO:
+			if (arg0) {
+				tty->iflags |= TTY_IECHO;
+			} else {
+				tty->iflags &= ~TTY_IECHO;
+			}
+			break;
+		default:
+			return -1;
+	}
 	return 0;
 }
 

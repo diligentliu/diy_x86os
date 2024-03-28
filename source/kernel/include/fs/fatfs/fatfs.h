@@ -2,8 +2,12 @@
 #define OS_FATFS_H
 
 #include "comm/types.h"
+#include "ipc/mutex.h"
 
 #pragma pack(1)
+
+#define FAT_CLUSTER_INVALID             0xFFF8				// 无效簇号
+#define FAT_CLUSTER_FREE                0x0000				// 空闲簇号
 
 #define DIRITEM_NAME_FREE               0xE5                // 目录项空闲名标记
 #define DIRITEM_NAME_END                0x00                // 目录项结束名标记
@@ -76,6 +80,9 @@ typedef struct _fat_t {
 	int current_sector;                     // 当前缓存的扇区数
 
 	struct _fs_t * fs;                      // 所在的文件系统
+	mutex_t mutex;                        // 互斥锁
 } fat_t;
+
+typedef uint16_t cluster_t;
 
 #endif //OS_FATFS_H

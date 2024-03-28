@@ -1,6 +1,7 @@
 #include "lib_syscall.h"
 #include "main.h"
 #include "fs/file.h"
+#include "dev/tty.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -113,6 +114,130 @@ static int do_ls(int argc, char *argv[]) {
 	return 0;
 }
 
+static int do_less(int argc, char *argv[]) {
+	if (argc > 3) {
+		printf(ESC_COLOR_ERROR"less: excess parameters"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+
+	if (argc == 1) {
+		fprintf(stderr, ESC_COLOR_ERROR"less: missing file\n"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+
+	int line_mode = 0;
+	char c;
+	while ((c = getopt(argc, argv, "lh")) != -1) {
+		switch (c) {
+			case 'h':
+				puts("show file content");
+				puts("Usage: less [-l] file");
+				optind = 1;        // getopt需要多次调用，需要重置
+				return 0;
+			case 'l':
+				line_mode = 1;
+				break;
+			case '?':
+				if (optarg) {
+					fprintf(stderr, ESC_COLOR_ERROR"Unknown option: -%s\n"ESC_COLOR_DEFAULT, optarg);
+				}
+				optind = 1;
+				return -1;
+		}
+	}
+
+	if (optind >= argc) {
+		fprintf(stderr, ESC_COLOR_ERROR"error: missing file\n"ESC_COLOR_DEFAULT);
+		optind = 1;
+		return -1;
+	}
+
+	FILE *file = fopen(argv[optind], "r");
+	if (file == (FILE *) 0) {
+		fprintf(stderr, ESC_COLOR_ERROR"less: open file failed\n"ESC_COLOR_DEFAULT);
+		optind = 1;
+		return -1;
+	}
+
+	char *buf = (char *) malloc(255);
+	if (line_mode == 0) {
+		while (fgets(buf, 255, file)) {
+			fputs(buf, stdout);
+		}
+	} else {
+		setvbuf(stdin, NULL, _IONBF, 0);
+		ioctl(0, TTY_CMD_ECHO, 0, 0);
+		while (1) {
+			char *b = fgets(buf, 255, file);
+			if (b == (char *) 0) {
+				break;
+			}
+			fputs(buf, stdout);
+
+			char less_c;
+			while ((less_c = fgetc(stdin)) != 'n') {
+				if (less_c == 'q') {
+					goto less_end;
+				}
+			}
+		}
+	less_end:
+		setvbuf(stdin, NULL, _IOLBF, BUFSIZ);
+		ioctl(0, TTY_CMD_ECHO, 1, 0);
+	}
+	
+	free(buf);
+
+	fclose(file);
+	optind = 1;
+	return 0;
+}
+
+static int do_cp(int argc, char *argv[]) {
+	if (argc != 3) {
+		printf(ESC_COLOR_ERROR"cp: missing parameters"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+
+	FILE *src = fopen(argv[1], "rb");
+	if (src == (FILE *) 0) {
+		fprintf(stderr, ESC_COLOR_ERROR"cp: open src file failed\n"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+
+	FILE *dest = fopen(argv[2], "wb");
+	if (dest == (FILE *) 0) {
+		fprintf(stderr, ESC_COLOR_ERROR"cp: open dest file failed\n"ESC_COLOR_DEFAULT);
+		fclose(src);
+		return -1;
+	}
+
+	char *buf = (char *) malloc(255);
+	int size;
+	while ((size = fread(buf, 1, 255, src)) > 0) {
+		fwrite(buf, 1, size, dest);
+	}
+
+	free(buf);
+	fclose(src);
+	fclose(dest);
+	return 0;
+}
+
+static int do_rm(int argc, char *argv[]) {
+	if (argc != 2) {
+		printf(ESC_COLOR_ERROR"rm: missing parameters"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+
+	int err = unlink(argv[1]);
+	if (err < 0) {
+		fprintf(stderr, ESC_COLOR_ERROR"rm: remove file failed\n"ESC_COLOR_DEFAULT);
+		return -1;
+	}
+	return 0;
+}
+
 static int do_exit(int argc, char *argv[]) {
 	if (argc > 1) {
 		printf(ESC_COLOR_ERROR"exit: excess parameters"ESC_COLOR_DEFAULT);
@@ -138,9 +263,24 @@ static const cli_cmd_t cmd_list[] = {
 			.do_func = do_echo
 		},
 		{
-				.name = "ls",
-				.usage = "ls -- list files",
-				.do_func = do_ls
+			.name = "ls",
+			.usage = "ls -- list files",
+			.do_func = do_ls
+		},
+		{
+			.name = "less",
+			.usage = "less [-l] file -- view file",
+			.do_func = do_less
+		},
+		{
+			.name = "cp",
+			.usage = "cp src dest -- copy file",
+			.do_func = do_cp
+		},
+		{
+			.name = "rm",
+			.usage = "rm file -- remove file",
+			.do_func = do_rm
 		},
 		{
 			.name = "exit",
@@ -172,17 +312,32 @@ static void run_exec_file(const char *name, int argc, char *argv[]) {
 		fprintf(stderr, ESC_COLOR_ERROR"fork failed\n"ESC_COLOR_DEFAULT);
 		return;
 	} else if (pid == 0) {
-		// execve(name, argv, NULL);
-		for (int i = 0; i < argc; ++i) {
-			msleep(1000);
-			printf("arg %d = %s\n", i, argv[i]);
+		int err = execve(name, argv, NULL);
+		if (err < 0) {
+			fprintf(stderr, ESC_COLOR_ERROR"execve: %s failed\n"ESC_COLOR_DEFAULT, name);
 		}
-		// fprintf(stderr, ESC_COLOR_ERROR"execve: %s failed\n"ESC_COLOR_DEFAULT, name);
 		exit(-1);
 	} else {
 		int status;
-		int pid = wait(&status);
-		fprintf(stderr, "cmd %s, pid = %d exit with status %d\n", name, pid, status);
+		int pid_wait = wait(&status);
+		fprintf(stderr, "cmd %s, pid = %d exit with status %d\n", name, pid_wait, status);
+	}
+}
+
+static const char *find_exec_path(const char *name) {
+	static char path[255];
+	int fd = open(name, O_RDONLY);
+	if (fd < 0) {
+		sprintf(path, "%s.elf", name);
+		fd = open(path, O_RDONLY);
+		if (fd < 0) {
+			return (const char *) 0;
+		}
+		close(fd);
+		return path;
+	} else {
+		close(fd);
+		return name;
 	}
 }
 
@@ -229,8 +384,11 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
-		run_exec_file(argv_[0], argc_, argv_);
-
+		const char *path = find_exec_path(argv_[0]);
+		if (path) {
+			run_exec_file(path, argc_, argv_);
+			continue;
+		}
 		fprintf(stderr, ESC_COLOR_ERROR"command not found: %s\n"ESC_COLOR_DEFAULT, argv_[0]);
 	}
 }

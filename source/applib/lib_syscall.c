@@ -92,6 +92,16 @@ int lseek(int file, int ptr, int dir) {
 	return sys_call(&args);
 }
 
+int ioctl(int file, int cmd, int arg0, int arg1) {
+	syscall_args_t args;
+	args.id = SYS_ioctl;
+	args.arg0 = (int) file;
+	args.arg1 = cmd;
+	args.arg2 = arg0;
+	args.arg3 = arg1;
+	return sys_call(&args);
+}
+
 /**
  * 获取文件的状态
  */
@@ -101,6 +111,13 @@ int fstat(int file, struct stat *st) {
     args.arg0 = (int) file;
     args.arg1 = (int) st;
     return sys_call(&args);
+}
+
+int unlink(const char *name) {
+	syscall_args_t args;
+	args.id = SYS_unlink;
+	args.arg0 = (int) name;
+	return sys_call(&args);
 }
 
 /**

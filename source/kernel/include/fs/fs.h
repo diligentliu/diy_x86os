@@ -19,10 +19,12 @@ typedef struct _fs_op_t {
 	void (*close)(file_t *file);
 	int (*seek)(file_t *file, int offset, int whence);
 	int (*stat)(file_t *file, struct stat *st);
+	int (*ioctl)(file_t *file, int cmd, int arg0, int arg1);
 
 	int (*opendir)(struct _fs_t *fs, const char *path, DIR *dir);
 	int (*readdir)(struct _fs_t *fs, DIR *dir, struct dirent *dirent);
 	int (*closedir)(struct _fs_t *fs, DIR *dir);
+	int (*unlink)(struct _fs_t *fs, const char *name);
 } fs_op_t;
 
 #define FS_MOUNT_POINT_LEN      512
@@ -62,9 +64,11 @@ int sys_isatty(int fd);
 int sys_fstat(int fd, struct stat *st);
 
 int sys_dup(int fd);
+int sys_ioctl(int fd, int cmd, int arg0, int arg1);
 
 int sys_opendir(const char *path, DIR *dir);
 int sys_readdir(DIR *dir, struct dirent *dirent);
 int sys_closedir(DIR *dir);
+int sys_unlink(const char *name);
 
 #endif //OS_FS_H

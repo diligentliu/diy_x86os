@@ -53,8 +53,10 @@ void move_to_first_task(void) {
 }
 
 void init_main(void) {
+	log_printf("=========================\n");
 	log_printf("Kernel is running....\n");
 	log_printf("Version: %s\n", OS_VERSION);
+	log_printf("=========================\n");
 
 	// int a = 3 / 0;
 	// irq_enable_global();

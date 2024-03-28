@@ -21,10 +21,6 @@ extern fs_op_t devfs_op;
 extern fs_op_t fatfs_op;
 static fs_t *root_fs;
 
-static uint8_t TEMP_ADDR[100 * 1024];
-static uint8_t *temp_pos;
-#define TEMP_FILE_ID 100
-
 static fs_op_t *get_fs_op(fs_type_t type, int major) {
 	switch (type) {
 		case FS_TYPE_DEV:
@@ -187,15 +183,6 @@ static void fs_unprotect(fs_t *fs) {
 }
 
 int sys_open(const char *path, int flags, ...) {
-	if (kernel_strncmp(path, "/shell.elf", 10) == 0) {
-		// read_disk(5000, 80, TEMP_ADDR);
-		// temp_pos = TEMP_ADDR;
-		int dev_id = dev_open(DEV_TYPE_DISK, 0xA0, (void *) 0);
-		dev_read(dev_id, 5000, TEMP_ADDR, 80);
-		temp_pos = (uint8_t *) TEMP_ADDR;
-		return TEMP_FILE_ID;
-	}
-
 	file_t *file = file_alloc();
 	if (!file) {
 		return -1;
@@ -234,8 +221,7 @@ int sys_open(const char *path, int flags, ...) {
 	int err = fs->op->open(fs, path, file);
 	if (err < 0) {
 		fs_unprotect(fs);
-
-		log_printf("open %s failed.", path);
+		// log_printf("sys_open: open %s failed.\n", path);
 		return -1;
 	}
 	fs_unprotect(fs);
@@ -251,12 +237,6 @@ sys_open_failed:
 }
 
 int sys_read(int fd, void *buf, int len) {
-	if (fd == TEMP_FILE_ID) {
-		kernel_memcpy(buf, temp_pos, len);
-		temp_pos += len;
-		return len;
-	}
-
 	if (is_fd_bad(fd)) {
 		log_printf("sys_read: invalid file descriptor\n");
 		return 0;
@@ -304,11 +284,6 @@ int sys_write(int fd, char *buf, int len) {
 }
 
 int sys_lseek(int fd, int offset, int whence) {
-	if (fd == TEMP_FILE_ID) {
-		temp_pos = (uint8_t *) (offset + TEMP_ADDR);
-		return 0;
-	}
-
 	if (is_fd_bad(fd)) {
 		return -1;
 	}
@@ -328,10 +303,6 @@ int sys_lseek(int fd, int offset, int whence) {
 }
 
 int sys_close(int fd) {
-	if (fd == TEMP_FILE_ID) {
-		return 0;
-	}
-
 	if (is_fd_bad(fd)) {
 		log_printf("sys_close: invalid file descriptor\n");
 		return -1;
@@ -414,6 +385,24 @@ int sys_dup(int fd) {
 	return -1;
 }
 
+int sys_ioctl(int fd, int cmd, int arg0, int arg1) {
+	if (is_fd_bad(fd)) {
+		return -1;
+	}
+
+	file_t *file = task_file(fd);
+	if (file == (file_t *) 0) {
+		log_printf("sys_ioctl: file not opened\n");
+		return -1;
+	}
+
+	fs_t *fs = file->fs;
+	fs_protect(fs);
+	int err = fs->op->ioctl(file, cmd, arg0, arg1);
+	fs_unprotect(fs);
+	return err;
+}
+
 int sys_opendir(const char *path, DIR *dir) {
 	fs_protect(root_fs);
 	int err = root_fs->op->opendir(root_fs, path, dir);
@@ -431,6 +420,13 @@ int sys_readdir(DIR *dir, struct dirent *dirent) {
 int sys_closedir(DIR *dir) {
 	fs_protect(root_fs);
 	int err = root_fs->op->closedir(root_fs, dir);
+	fs_unprotect(root_fs);
+	return err;
+}
+
+int sys_unlink(const char *name) {
+	fs_protect(root_fs);
+	int err = root_fs->op->unlink(root_fs, name);
 	fs_unprotect(root_fs);
 	return err;
 }

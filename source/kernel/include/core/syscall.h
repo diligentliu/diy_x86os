@@ -20,11 +20,12 @@
 #define SYS_sbrk                56
 #define SYS_fstat               57
 #define SYS_dup                 58
+#define SYS_ioctl               59
 
 #define SYS_opendir             60
 #define SYS_readdir             61
 #define SYS_closedir            62
-
+#define SYS_unlink              63
 
 #define SYS_print_msg           100
 
