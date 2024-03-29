@@ -195,7 +195,7 @@ static int do_less(int argc, char *argv[]) {
 
 static int do_cp(int argc, char *argv[]) {
 	if (argc != 3) {
-		printf(ESC_COLOR_ERROR"cp: missing parameters"ESC_COLOR_DEFAULT);
+		printf(ESC_COLOR_ERROR"cp: missing parameters\n"ESC_COLOR_DEFAULT);
 		return -1;
 	}
 
@@ -233,7 +233,7 @@ static int do_rm(int argc, char *argv[]) {
 	int err = unlink(argv[1]);
 	if (err < 0) {
 		fprintf(stderr, ESC_COLOR_ERROR"rm: remove file failed\n"ESC_COLOR_DEFAULT);
-		return -1;
+		return err;
 	}
 	return 0;
 }

@@ -628,8 +628,9 @@ int fatfs_unlink(struct _fs_t *fs, const char *name) {
 			int cluster = (item->DIR_FstClusHI << 16) | item->DIR_FstClusLO;
 			cluster_free_chain(fat, cluster);
 
-			kernel_memset(item, 0, sizeof(diritem_t));
-			return write_dir_entry(fat, item, i);
+			diritem_t free_item;
+			kernel_memset(&free_item, 0, sizeof(diritem_t));
+			return write_dir_entry(fat, &free_item, i);
 		}
 	}
 	return -1;
