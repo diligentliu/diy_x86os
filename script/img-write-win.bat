@@ -1,19 +1,19 @@
 set DISK1_NAME=disk1.vhd
 
-@REM –¥boot«¯£¨∂®ŒªµΩ¥≈≈Ãø™Õ∑£¨–¥1∏ˆøÈ£∫512◊÷Ω⁄
+@REM ÂÜôbootÂå∫ÔºåÂÆö‰ΩçÂà∞Á£ÅÁõòÂºÄÂ§¥ÔºåÂÜô1‰∏™ÂùóÔºö512Â≠óËäÇ
 dd if=boot.bin of=%DISK1_NAME% bs=512 conv=notrunc count=1
 
-@REM –¥loader«¯£¨∂®ŒªµΩ¥≈≈Ãµ⁄2∏ˆøÈ£¨–¥1∏ˆøÈ£∫512◊÷Ω⁄
+@REM ÂÜôloaderÂå∫ÔºåÂÆö‰ΩçÂà∞Á£ÅÁõòÁ¨¨2‰∏™ÂùóÔºåÂÜô1‰∏™ÂùóÔºö512Â≠óËäÇ
 dd if=loader.bin of=%DISK1_NAME% bs=512 conv=notrunc seek=1
 
-@REM –¥kernel«¯£¨∂®ŒªµΩ¥≈≈Ãµ⁄100∏ˆøÈ
+@REM ÂÜôkernelÂå∫ÔºåÂÆö‰ΩçÂà∞Á£ÅÁõòÁ¨¨100‰∏™Âùó
 dd if=kernel.elf of=%DISK1_NAME% bs=512 conv=notrunc seek=100
 
-@REM  –¥”¶”√≥Ã–Úinit£¨¡Ÿ ± π”√
+@REM  ÂÜôÂ∫îÁî®Á®ãÂ∫èinitÔºå‰∏¥Êó∂‰ΩøÁî®
 @REM dd if=init.elf of=%DISK1_NAME% bs=512 conv=notrunc seek=5000
 @REM dd if=shell.elf of=%DISK1_NAME% bs=512 conv=notrunc seek=5000
 
-@REM –¥”¶”√≥Ã–Ú£¨ π”√œµÕ≥µƒπ“‘ÿ√¸¡Ó
+@REM ÂÜôÂ∫îÁî®Á®ãÂ∫èÔºå‰ΩøÁî®Á≥ªÁªüÁöÑÊåÇËΩΩÂëΩ‰ª§
 @REM set DISK2_NAME=disk2.vhd
 @REM set TARGET_PATH=k
 @REM echo select vdisk file="%cd%\%DISK2_NAME%" >a.txt
@@ -23,7 +23,7 @@ dd if=kernel.elf of=%DISK1_NAME% bs=512 conv=notrunc seek=100
 @REM diskpart /s a.txt
 @REM del a.txt
 
-@REM ∏¥÷∆”¶”√≥Ã–Ú
+@REM Â§çÂà∂Â∫îÁî®Á®ãÂ∫è
 @REM copy /Y init.elf %TARGET_PATH%:\init
 @REM copy /Y shell.elf %TARGET_PATH%:\shell.elf
 @REM copy /Y loop %TARGET_PATH%:\loop
