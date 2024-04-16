@@ -34,7 +34,7 @@ typedef struct _addr_alloc_t {
  * @brief 虚拟地址到物理地址之间的映射关系表
  */
 typedef struct _memory_map_t {
-	void *vstart;     // 虚拟地址
+	void *vstart;     	// 虚拟地址
 	void *vend;
 	void *pstart;       // 物理地址
 	uint32_t perm;      // 访问权限
