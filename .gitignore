@@ -1,6 +1,5 @@
 /.idea
 /build
 /cmake-build-debug
-/cmake-build-debug-x86_63-elf
-/image
+/cmake-build-debug-x86_64-elf
 .DS_Store

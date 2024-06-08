@@ -1,0 +1,4 @@
+[submodule "image"]
+	path = image
+	url = https://github.com/diligentliu/diy_x86os_image.git
+	branch = main
